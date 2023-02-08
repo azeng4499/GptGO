@@ -1,0 +1,96 @@
+.main {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #23272f;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 1300px;
+}
+
+.input-group {
+  display: flex;
+  height: 30px;
+  width: 800px;
+  gap: 20px;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#apiInput {
+  width: 400px;
+}
+
+.setup-steps {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.header {
+  width: 800px;
+  font-size: 3rem;
+  border-bottom: solid;
+  border-width: 8px;
+  color: #00b188;
+}
+
+body,
+html {
+  display: flex;
+  margin: 0px;
+  font-family: "Prompt", sans-serif;
+  width: 100vw;
+  height: 100vh;
+}
+
+#status {
+  color: white;
+  font-size: 1rem;
+}
+
+.gif {
+  height: 500px;
+  object-fit: contain;
+  margin-top: 10px;
+}
+
+.gif-div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 800px;
+  flex-direction: column;
+}
+
+.how-to-steps {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.logo-div {
+  width: 800px;
+  height: 80px;
+  /* background-color: #fff; */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.test {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 800px;
+  gap: 10px;
+}

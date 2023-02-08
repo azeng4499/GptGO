@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<head>
+  <link rel="icon" href="%PUBLIC_URL%/images/logo.ico" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/images/logo-apple.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Khojki:wght@500&family=Prompt&display=swap"
+    rel="stylesheet"
+  />
+  <title>GptGO Settings Page</title>
+  <link rel="stylesheet" type="text/css" href="options.css" />
+  <script src="options.js"></script>
+</head>
+<body>
+  <div class="main">
+    <div class="logo-div">
+      <img src="../images/gptGO-logo.png" class="logo" />
+    </div>
+    <div class="header">Setup</div>
+    <div class="setup-steps">
+      <ul style="gap: 10px">
+        <li>
+          1 ) Go to
+          <a href="https://platform.openai.com/account/api-keys" target="_blank"
+            >https://platform.openai.com/account/api-keys</a
+          >
+        </li>
+        <li>2 ) Log into your OpenAi Account</li>
+        <li>3 ) Click on "Create new secret key"</li>
+        <li>
+          <div style="margin-bottom: 10px">
+            4 ) Copy the key and paste it below:
+          </div>
+          <div class="input-group">
+            <input type="password" id="apiInput" />
+            <button type="button" id="submitButton">Go</button>
+            <div id="status"></div>
+          </div>
+        </li>
+        <li>
+          **Your key will be stored locally and will never be shared with
+          anyone**
+        </li>
+      </ul>
+    </div>
+    <div class="header">How to Use</div>
+    <div class="gif-div">
+      <div class="how-to-steps">
+        <ul style="gap: 10px">
+          <li>1 ) Highlight any section of text with your cursor</li>
+          <li>
+            2 ) Open the GptGO chrome extension from the top right part of your
+            browser
+          </li>
+          <li>
+            3 ) The text you highlighted will already be in the prompt, and you
+            can edit your prompt if needed
+          </li>
+          <li>4 ) Click the button or simply use CMD + SHIFT to search</li>
+          <li>**First time users may need to restart browser**</li>
+          <div class="test">
+            <div>Give it a try on the sentence below:</div>
+            <div>
+              <code style="background-color: #0082b1; padding: 10px 20px"
+                >How are you doing today, ChatGPT?</code
+              >
+            </div>
+          </div>
+        </ul>
+      </div>
+      <img src="../images/gptGO-demo.gif" class="gif" />
+    </div>
+  </div>
+</body>

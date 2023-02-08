@@ -1,0 +1,158 @@
+.main-div {
+  background-color: #23272f;
+  width: 400px;
+  height: 500px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  position: absolute;
+}
+
+.logo {
+  width: 150px;
+  height: 50px;
+  object-fit: contain;
+  margin-left: 25px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.prompt-label {
+  color: #fff;
+  align-self: flex-start;
+  margin-left: 15px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.response-label {
+  color: #fff;
+  align-self: flex-start;
+  font-weight: bold;
+  width: 100%;
+  padding: 8px 0px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.question-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 10px;
+  /* margin-bottom: -15px; */
+}
+
+.text-area {
+  border-style: none;
+  border-color: Transparent;
+  overflow: auto;
+  outline: none;
+  width: calc(100% - 30px);
+  height: fit-content;
+  overflow: scroll;
+  background-color: #23272f;
+  color: #fff;
+  font-size: "1.2em";
+  resize: none;
+}
+
+.answer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 10px;
+  /* height: 215px; */
+}
+
+.answer-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+  width: calc(100% - 25px);
+  border-top: solid;
+  border-width: 1px;
+  border-color: #fff;
+  overflow: scroll;
+}
+
+.action-div {
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+}
+
+.circles {
+  width: 80px;
+  height: 80px;
+  align-self: center;
+  justify-self: center;
+}
+
+.circle-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.response-text {
+  color: #0082b1;
+  font-family: "Prompt", sans-serif;
+  font-size: 0.8rem;
+}
+
+.error-text {
+  color: #ff0000;
+  font-family: "Prompt", sans-serif;
+  font-size: 0.8rem;
+}
+
+.button-div {
+  width: 100%;
+  height: 60px;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button {
+  width: calc(100% - 40px);
+  background-color: #00b188;
+  color: #fff;
+  height: 30px;
+  border: none;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #fff;
+  color: #00b188;
+}
+
+.logo-div {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings {
+  margin-right: 20px;
+  width: 25px;
+  height: 25px;
+  color: #fff;
+}
+
+.copy {
+  width: 20px;
+  height: 20px;
+}
