@@ -1,18 +1,16 @@
 /* global chrome */
 
 import React, { useEffect, useState, useRef } from "react";
-import { FiSettings } from "react-icons/fi";
+import { FiHelpCircle } from "react-icons/fi";
 import "./Main.css";
 import gptGOLogo from "../../gptGO-logo.png";
 import { Circles } from "react-loading-icons";
 import TextareaAutosize from "react-textarea-autosize";
-import getResponse from "../../api-functions";
-import { errorMessages } from "../../api-functions";
 import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 
-const Main = ({ apiKey }) => {
+const Main = () => {
   const [query, setQuery] = useState();
   const [response, setResponse] = useState();
   const [loading, setLoading] = useState(false);
@@ -23,67 +21,54 @@ const Main = ({ apiKey }) => {
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
 
-  const setChromeStore = (field, data) => {
+  const setStorage = async (field, data) => {
     chrome.storage.local.set({ [field]: data });
   };
 
   useEffect(() => {
-    setHeight(ref.current.clientHeight);
-  }, []);
+    if (ref.current.clientHeight !== height) {
+      setHeight(ref.current.clientHeight);
+    }
+  }, [textArea]);
 
-  const isError = (result) => {
-    return (
-      result.response === errorMessages.standard ||
-      result.response === errorMessages.prompt ||
-      result.response === errorMessages.tooManyRequests
-    );
-  };
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.loading && changes.loading.newValue === "false") {
+      chrome.storage.local.get(["response"]).then((response) => {
+        setResponse(response.response[1]);
+        setError(response.response[2]);
+        setLoading(false);
+      });
+    }
+  });
 
   useEffect(() => {
     chrome.storage.local
-      .get(["query", "lastQuery", "response"])
+      .get(["query", "response", "loading"])
       .then((result) => {
+        if (result.loading == null || result.loading === "false") {
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
         if (result.query) {
           setQuery(result.query);
           setTextArea(result.query);
-          if (result.lastQuery != null && result.lastQuery === result.query) {
-            setResponse(result.response);
-            setError(isError(result));
-          }
-        } else {
-          if (result.lastQuery != null) {
-            setChromeStore("query", result.lastQuery);
-            setQuery(result.lastQuery);
-            setResponse(result.response);
-            setError(isError(result));
-          } else {
-            setQuery(null);
+          if (result.response[0] === result.query) {
+            setResponse(result.response[1]);
+            setError(result.response[2]);
           }
         }
       });
   }, []);
 
-  const handleSearchRequest = () => {
-    if (!loading) {
-      setLoading(true);
-      let send = "";
+  const handleSearchRequest = async () => {
+    setLoading(true);
 
-      if (textArea !== query) {
-        setQuery(textArea);
-        setChromeStore("query", textArea);
-        send = textArea;
-      } else if (textArea === query) {
-        send = query;
-      }
-      setChromeStore("lastQuery", send);
-      setCopied(false);
-      getResponse(send, apiKey).then((response) => {
-        setResponse(response.text);
-        setChromeStore("response", response.text);
-        setError(response.error);
-        setLoading(false);
-      });
+    if (textArea !== query) {
+      setQuery(textArea);
+      await setStorage("query", textArea);
     }
+    await setStorage("loading", "true.frontend");
   };
 
   useEffect(() => {
@@ -102,7 +87,7 @@ const Main = ({ apiKey }) => {
     <div className="main-div">
       <div className="logo-div">
         <img src={gptGOLogo} className="logo" alt="logo" />
-        <FiSettings
+        <FiHelpCircle
           className="settings"
           onClick={() => chrome.runtime.openOptionsPage()}
         />
@@ -119,15 +104,12 @@ const Main = ({ apiKey }) => {
               ? null
               : "Please highlight a section of text or start typing in this box."
           }
+          disabled={loading}
           onChange={(e) => {
             if (response) {
               setResponse(null);
             }
             setTextArea(e.target.value);
-
-            if (ref.current.clientHeight !== height) {
-              setHeight(ref.current.clientHeight);
-            }
           }}
         />
       </div>
@@ -154,7 +136,9 @@ const Main = ({ apiKey }) => {
               </div>
             ) : response && !error ? (
               <div>
-                <div className="response-text">{response}</div>
+                <div className="response-text">
+                  <pre className="pre">{response}</pre>
+                </div>
               </div>
             ) : response && error ? (
               <div className="error-text">{response}</div>
@@ -167,6 +151,7 @@ const Main = ({ apiKey }) => {
           className="button"
           type="button"
           onClick={() => handleSearchRequest()}
+          disabled={loading}
         >
           Search
         </button>

@@ -105,6 +105,7 @@
   color: #0082b1;
   font-family: "Prompt", sans-serif;
   font-size: 0.8rem;
+  /* margin-top: -25px; */
 }
 
 .error-text {
@@ -155,4 +156,11 @@ button:hover {
 .copy {
   width: 20px;
   height: 20px;
+}
+
+.pre {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }

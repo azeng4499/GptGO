@@ -7,7 +7,7 @@
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  min-height: 1300px;
+  min-height: 1500px;
 }
 
 .input-group {
@@ -93,4 +93,10 @@ html {
   padding-bottom: 10px;
   width: 800px;
   gap: 10px;
+}
+
+.sub-header {
+  width: 800px;
+  font-size: 1rem;
+  color: #fff;
 }

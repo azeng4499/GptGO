@@ -22,7 +22,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "contextMenus", "notifications"],
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],

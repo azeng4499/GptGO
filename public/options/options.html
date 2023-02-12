@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
 <head>
-  <link rel="icon" href="%PUBLIC_URL%/images/logo.ico" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/images/logo-apple.png" />
+  <link rel="icon" href="../images/logo.ico" />
+  <link rel="apple-touch-icon" href="../images/logo-apple.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -19,6 +19,12 @@
       <img src="../images/gptGO-logo.png" class="logo" />
     </div>
     <div class="header">Setup</div>
+    <div
+      class="sub-header"
+      style="text-decoration: underline; font-size: 1.2rem"
+    >
+      Welcome to GptGO! Please complete the steps below to setup your extension:
+    </div>
     <div class="setup-steps">
       <ul style="gap: 10px">
         <li>
@@ -39,29 +45,33 @@
             <div id="status"></div>
           </div>
         </li>
-        <li>
-          **Your key will be stored locally and will never be shared with
-          anyone**
-        </li>
       </ul>
     </div>
+    <div class="sub-header">
+      Your key will be stored locally and will never be shared with anybody. If
+      you ever need to change your key, just resubmit it in the input above.
+    </div>
     <div class="header">How to Use</div>
+    <div
+      class="sub-header"
+      style="text-decoration: underline; font-size: 1.2rem"
+    >
+      The quickest and easiest way to use GptGO is Quick Search
+    </div>
     <div class="gif-div">
       <div class="how-to-steps">
         <ul style="gap: 10px">
           <li>1 ) Highlight any section of text with your cursor</li>
           <li>
-            2 ) Open the GptGO chrome extension from the top right part of your
-            browser
+            2 ) Right click and select "Search text and get response as
+            notification"
           </li>
           <li>
-            3 ) The text you highlighted will already be in the prompt, and you
-            can edit your prompt if needed
+            3 ) Within a few seconds, you should receive a notification with
+            ChatGPT's response
           </li>
-          <li>4 ) Click the button or simply use CMD + SHIFT to search</li>
-          <li>**First time users may need to restart browser**</li>
           <div class="test">
-            <div>Give it a try on the sentence below:</div>
+            <div>Give it a try on the prompt below:</div>
             <div>
               <code style="background-color: #0082b1; padding: 10px 20px"
                 >How are you doing today, ChatGPT?</code
@@ -70,7 +80,63 @@
           </div>
         </ul>
       </div>
-      <img src="../images/gptGO-demo.gif" class="gif" />
+      <div class="sub-header">
+        If you haven't recieved a notification after 1 minute, please scroll
+        down to the "Troubleshooting Notifications" section.
+      </div>
+    </div>
+    <div
+      class="sub-header"
+      style="text-decoration: underline; font-size: 1.2rem"
+    >
+      To read longer responses and search custom prompts, use the GptGO popup:
+    </div>
+    <div class="gif-div">
+      <div class="how-to-steps">
+        <ul style="gap: 10px">
+          <li>1 ) Highlight any section of text with your cursor</li>
+          <li>
+            2 ) Click on the puzzle piece from the top right of your browser
+          </li>
+          <li>3 ) Select GptGO from the list, the popup should open</li>
+          <li>4 ) If needed, edit your prompt</li>
+          <li>5 ) Click the search button</li>
+          <div class="test">
+            <div>Give it a try on the prompt below:</div>
+            <div>
+              <code style="background-color: #0082b1; padding: 10px 20px"
+                >Write a short essay on the benefits of AI</code
+              >
+            </div>
+          </div>
+        </ul>
+      </div>
+      <div class="sub-header">
+        You may need to refresh the pages you had open prior to downloading
+        GptGO in order for this feature to work properly.
+      </div>
+    </div>
+    <div class="header">Troubleshooting Notifications</div>
+    <div
+      class="sub-header"
+      style="text-decoration: underline; font-size: 1.2rem"
+    >
+      Your computer settings may be preventing GptGO from sending a
+      notification. Please make sure the following are true:
+    </div>
+
+    <div class="gif-div">
+      <div class="how-to-steps">
+        <ul style="gap: 10px">
+          <li>1 ) Make sure notifications are enabled on your computer</li>
+          <li>
+            2 ) Make sure notifications are enabled on your Google Chrome
+            account
+          </li>
+          <li>3 ) Make sure your computer is not on Do Not Disturb</li>
+          <div class="test"></div>
+        </ul>
+      </div>
     </div>
   </div>
 </body>

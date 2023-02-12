@@ -18,6 +18,7 @@ async function submitApiKey() {
     },
     body: JSON.stringify(params_),
   };
+
   const response = await fetch(
     "https://api.openai.com/v1/completions",
     requestOptions
@@ -55,7 +56,6 @@ function loadDataIfPresent() {
 document.addEventListener("mouseup", myFunction);
 
 function myFunction() {
-  console.log("triggered");
   value = window.getSelection().toString();
   if (value) {
     chrome.storage.local.set({ query: value });
