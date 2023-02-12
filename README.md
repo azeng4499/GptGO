@@ -24,3 +24,6 @@ GptGO also has a small popup window that allows you to type in your own prompt a
 ## Support
 
 If you have any questions or feedback about GptGo, please feel free to reach out to me at aaronz2003@gmail.com. I'm always happy to help.
+
+
+hello hello hello
