@@ -1,70 +1,26 @@
-# Getting Started with Create React App
+# GptGo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+GptGo is a chrome extension that allows you to use ChatGPT directly from your browser. 
 
-## Available Scripts
+With GptGo, you can instantly interact with ChatGPT without ever leaving your tab. I built GptGo with React.js and it's been designed to be simple and intuitive to use. 
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+GptGO's flagship feature is Quick Search:
+* Quick Search allows you to send/receive messages with ChatGPT without ever having to interact with a user interface
+* Simply highlight a section of text, right click, and select the GptGO extension
+* Within seconds, the response from ChatGPT will appear on your screen as a notification
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+GptGO also has a small popup window that allows you to type in your own prompt and read longer responses from ChatGPT.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. Visit the Chrome Web Store and search for GptGo.
+2. Once you've found the GptGo extension, click "Add to Chrome".
+3. Once the extension has installed, you'll be presented with a GptGo icon in the top-right corner of your browser.
+4. Click the GptGo icon and you'll be taken to the GptGO setup page.
+5. The setup takes less than 5 minutes, and you're ready to start using GptGo.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Support
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+If you have any questions or feedback about GptGo, please feel free to reach out to me at aaronz2003@gmail.com. I'm always happy to help.
