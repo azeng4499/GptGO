@@ -7,7 +7,13 @@
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  min-height: 1500px;
+  min-height: 2150px;
+  /* background: rgb(0, 177, 136);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 177, 136, 1) 0%,
+    rgba(0, 130, 177, 1) 100%
+  ); */
 }
 
 .input-group {
@@ -21,7 +27,7 @@
 }
 
 #apiInput {
-  width: 400px;
+  width: 300px;
 }
 
 .setup-steps {
@@ -31,10 +37,11 @@
 
 .header {
   width: 800px;
-  font-size: 3rem;
+  font-size: 2.5rem;
   border-bottom: solid;
-  border-width: 8px;
-  color: #00b188;
+  border-width: 5px;
+  /* color: #00b188; */
+  color: #fff;
 }
 
 body,
@@ -77,6 +84,7 @@ html {
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  margin-top: 20px;
 }
 
 .logo {
@@ -99,4 +107,11 @@ html {
   width: 800px;
   font-size: 1rem;
   color: #fff;
+}
+
+#submitButton {
+  background-color: transparent;
+  color: #fff;
+  border: solid;
+  border-radius: 5px;
 }

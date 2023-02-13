@@ -1,7 +1,19 @@
 async function submitApiKey() {
+  const checked = document.getElementById("checkbox").checked;
+
+  if (checked) {
+    callAPI();
+  } else {
+    document.getElementById("status").innerHTML =
+      "Failure, Terms of Service checkbox required.";
+    document.getElementById("status").style.backgroundColor = "red";
+  }
+}
+
+const callAPI = async () => {
   const apiKey = document.getElementById("apiInput").value;
   document.getElementById("status").innerHTML = "Checking key...";
-  document.getElementById("status").style.color = "white";
+  document.getElementById("status").style.backgroundColor = "orange";
 
   const params_ = {
     model: "text-davinci-003",
@@ -26,20 +38,21 @@ async function submitApiKey() {
 
   if (response.status == 200 || response.status == 201) {
     document.getElementById("status").innerHTML = "Success, you're all set!";
-    document.getElementById("status").style.color = "#00b188";
+    document.getElementById("status").style.backgroundColor = "green";
     chrome.storage.local.set({ apiKey: apiKey });
   } else {
     document.getElementById("status").innerHTML = "Failure, try again.";
-    document.getElementById("status").style.color = "red";
+    document.getElementById("status").style.backgroundColor = "red";
   }
-}
+};
 
 function loadDataIfPresent() {
   chrome.storage.local.get(["apiKey"]).then((response) => {
     if (response.apiKey) {
+      document.getElementById("checkbox").checked = true;
       document.getElementById("apiInput").value = response.apiKey;
       document.getElementById("status").innerHTML = "Success, you're all set!";
-      document.getElementById("status").style.color = "#00b188";
+      document.getElementById("status").style.backgroundColor = "green";
     }
   });
 }

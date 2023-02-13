@@ -12,32 +12,28 @@ chrome.contextMenus.remove("3", () => {
 });
 
 chrome.runtime.onMessage.addListener(async function (request) {
-  console.log("inside OnMessage");
   getStorage("loading").then((loading) => {
     if (loading == null || loading === "false") {
-      console.log("Set query to " + request.payload);
       chrome.storage.local.set({ query: request.payload });
     }
   });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
-  console.log("inside contextMenus onclicked");
   getStorage("apiKey").then(async (apiKey) => {
     if (apiKey) {
       getStorage("loading").then(async (loading) => {
         if (loading == null || loading === "false") {
-          console.log("Set loading to true");
           await setStorage("loading", "true.backend");
+          console.log("set loading to true.backend");
           const query = await getStorage("query");
           if (query != info.selectionText) {
-            console.log("Set highlighted text to query");
             await setStorage("query", info.selectionText);
           }
           getResponse(apiKey).then(async (response) => {
-            console.log("Set response to api result");
             await setStorage("response", response);
-            console.log("Sending notification");
+            console.log("response: " + response);
+
             if (response[2] === false) {
               sendNotification(
                 "Response to: " + response[0],
@@ -47,9 +43,8 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
               sendNotification("Error!!!", response[1]);
             }
             await setStorage("loading", "false");
+            console.log("set loading to false from backend");
           });
-        } else {
-          console.log("failed loading");
         }
       });
     } else {
@@ -67,6 +62,7 @@ chrome.storage.onChanged.addListener((changes) => {
       getResponse(apiKey).then(async (response) => {
         await setStorage("response", response);
         await setStorage("loading", "false");
+        console.log("set loading to false from frontend");
       });
     });
   }
@@ -103,6 +99,9 @@ const setStorage = async (key, value) => {
 };
 
 const callAPI = async (query, apiKey) => {
+  console.log("query: " + query);
+  console.log("apiKey: " + apiKey);
+
   const params = {
     model: "text-davinci-003",
     temperature: 0.75,
@@ -121,8 +120,6 @@ const callAPI = async (query, apiKey) => {
     signal: AbortSignal.timeout(45000),
   };
 
-  console.log("in callAPI");
-
   try {
     let res;
     try {
@@ -133,7 +130,6 @@ const callAPI = async (query, apiKey) => {
     } catch (err) {
       console.log(err);
     }
-    console.log("res : " + res);
     if (res == null || (res.status != 200 && res.status != 201)) {
       if (res && res.status === 429) {
         return {
@@ -147,9 +143,7 @@ const callAPI = async (query, apiKey) => {
         };
       }
     } else {
-      console.log("before res.json");
       const data = await res.json();
-      console.log("after res.json" + data);
       return { response: data.choices[0].text, error: false };
     }
   } catch (err) {
@@ -159,7 +153,6 @@ const callAPI = async (query, apiKey) => {
 };
 
 const getResponse = async (apiKey) => {
-  console.log("get response called");
   const query = await getStorage("query");
 
   if (query && query !== "") {

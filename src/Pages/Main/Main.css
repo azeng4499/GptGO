@@ -59,6 +59,10 @@
   resize: none;
 }
 
+.text-area::-webkit-scrollbar {
+  display: none;
+}
+
 .answer-container {
   display: flex;
   justify-content: center;
@@ -80,10 +84,18 @@
   overflow: scroll;
 }
 
+.answer-div::-webkit-scrollbar {
+  display: none;
+}
+
 .action-div {
   width: 100%;
   height: 100%;
   overflow: scroll;
+}
+
+.action-div::-webkit-scrollbar {
+  display: none;
 }
 
 .circles {
@@ -163,4 +175,8 @@ button:hover {
   max-width: 100%;
   overflow-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.pre::-webkit-scrollbar {
+  display: none;
 }

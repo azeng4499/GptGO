@@ -19,123 +19,262 @@
       <img src="../images/gptGO-logo.png" class="logo" />
     </div>
     <div class="header">Setup</div>
-    <div
-      class="sub-header"
-      style="text-decoration: underline; font-size: 1.2rem"
-    >
+    <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
       Welcome to GptGO! Please complete the steps below to setup your extension:
     </div>
     <div class="setup-steps">
-      <ul style="gap: 10px">
-        <li>
-          1 ) Go to
-          <a href="https://platform.openai.com/account/api-keys" target="_blank"
-            >https://platform.openai.com/account/api-keys</a
-          >
-        </li>
-        <li>2 ) Log into your OpenAi Account</li>
-        <li>3 ) Click on "Create new secret key"</li>
-        <li>
-          <div style="margin-bottom: 10px">
-            4 ) Copy the key and paste it below:
-          </div>
-          <div class="input-group">
-            <input type="password" id="apiInput" />
-            <button type="button" id="submitButton">Go</button>
-            <div id="status"></div>
-          </div>
-        </li>
-      </ul>
+      <div style="border: solid; margin-bottom: 10px; background: #0082b1">
+        <ul style="gap: 10px; list-style: none">
+          <li>
+            1 ) Go to
+            <a
+              href="https://platform.openai.com/account/api-keys"
+              target="_blank"
+              style="color: white"
+              >https://platform.openai.com/account/api-keys</a
+            >
+          </li>
+          <li>2 ) Log into your OpenAI Account</li>
+          <li>3 ) Click on "Create new secret key"</li>
+          <li>4 ) Copy the key and paste it below</li>
+          <li>
+            5 ) Read the Terms of Service located at the bottom of this page
+          </li>
+          <li>
+            <div style="margin-bottom: 10px">6 ) Click submit</div>
+          </li>
+        </ul>
+      </div>
+      <div style="display: flex; margin-bottom: 10px; gap: 10px">
+        <input type="checkbox" id="checkbox" />
+        <div>I have read and understand the Terms of Service</div>
+      </div>
+      <div class="input-group">
+        <input type="password" id="apiInput" />
+        <button type="button" id="submitButton">Submit</button>
+        <div id="status"></div>
+      </div>
     </div>
-    <div class="sub-header">
+    <!-- <div class="sub-header">
       Your key will be stored locally and will never be shared with anybody. If
       you ever need to change your key, just resubmit it in the input above.
-    </div>
+    </div> -->
     <div class="header">How to Use</div>
-    <div
-      class="sub-header"
-      style="text-decoration: underline; font-size: 1.2rem"
-    >
-      The quickest and easiest way to use GptGO is Quick Search
+    <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
+      The quickest and easiest way to use GptGO is Quick Search:
     </div>
     <div class="gif-div">
       <div class="how-to-steps">
-        <ul style="gap: 10px">
-          <li>1 ) Highlight any section of text with your cursor</li>
-          <li>
-            2 ) Right click and select "Search text and get response as
-            notification"
-          </li>
-          <li>
-            3 ) Within a few seconds, you should receive a notification with
-            ChatGPT's response
-          </li>
-          <div class="test">
-            <div>Give it a try on the prompt below:</div>
-            <div>
-              <code style="background-color: #0082b1; padding: 10px 20px"
-                >How are you doing today, ChatGPT?</code
-              >
-            </div>
+        <div style="border: solid; margin-bottom: 10px; background: #0082b1">
+          <ul style="gap: 10px; list-style: none">
+            <li>1 ) Highlight any section of text with your cursor</li>
+            <li>
+              2 ) Right click and select "Search text and get response as
+              notification"
+            </li>
+            <li>
+              3 ) Within a few seconds, you should receive a notification with
+              ChatGPT's response
+            </li>
+          </ul>
+        </div>
+        <div class="test">
+          <div>Give it a try on the prompt below:</div>
+          <div>
+            <code style="background-color: #00b188; padding: 10px 20px"
+              >How are you doing today, ChatGPT?</code
+            >
           </div>
-        </ul>
+        </div>
       </div>
-      <div class="sub-header">
+      <!-- <div class="sub-header">
         If you haven't recieved a notification after 1 minute, please scroll
         down to the "Troubleshooting Notifications" section.
-      </div>
+      </div> -->
     </div>
-    <div
-      class="sub-header"
-      style="text-decoration: underline; font-size: 1.2rem"
-    >
+    <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
       To read longer responses and search custom prompts, use the GptGO popup:
     </div>
     <div class="gif-div">
       <div class="how-to-steps">
-        <ul style="gap: 10px">
-          <li>1 ) Highlight any section of text with your cursor</li>
-          <li>
-            2 ) Click on the puzzle piece from the top right of your browser
-          </li>
-          <li>3 ) Select GptGO from the list, the popup should open</li>
-          <li>4 ) If needed, edit your prompt</li>
-          <li>5 ) Click the search button</li>
-          <div class="test">
-            <div>Give it a try on the prompt below:</div>
-            <div>
-              <code style="background-color: #0082b1; padding: 10px 20px"
-                >Write a short essay on the benefits of AI</code
-              >
-            </div>
+        <div style="border: solid; margin-bottom: 10px; background: #0082b1">
+          <ul style="gap: 10px; list-style: none">
+            <li>1 ) Highlight any section of text with your cursor</li>
+            <li>
+              2 ) Click on the puzzle piece from the top right of your browser
+            </li>
+            <li>3 ) Select GptGO from the list, the popup should open</li>
+            <li>4 ) If needed, edit your prompt</li>
+            <li>5 ) Click the search button</li>
+          </ul>
+        </div>
+        <div class="test">
+          <div>Give it a try on the prompt below:</div>
+          <div>
+            <code style="background-color: #00b188; padding: 10px 20px"
+              >Write a short essay on the benefits of AI</code
+            >
           </div>
-        </ul>
+        </div>
       </div>
-      <div class="sub-header">
+      <!-- <div class="sub-header">
         You may need to refresh the pages you had open prior to downloading
         GptGO in order for this feature to work properly.
-      </div>
+      </div> -->
     </div>
-    <div class="header">Troubleshooting Notifications</div>
+    <div class="header">Troubleshooting FAQ</div>
     <div
       class="sub-header"
       style="text-decoration: underline; font-size: 1.2rem"
     >
-      Your computer settings may be preventing GptGO from sending a
-      notification. Please make sure the following are true:
+      Why am I not getting a notification from Quick Search?
     </div>
-
     <div class="gif-div">
+      <!-- <div class="how-to-steps" style="align-self: flex-start">
+        Your computer settings may be preventing GptGO from sending a
+        notification. Please make sure the following are true:
+      </div> -->
       <div class="how-to-steps">
-        <ul style="gap: 10px">
-          <li>1 ) Make sure notifications are enabled on your computer</li>
+        <div style="width: 800px">
+          <ul style="gap: 10px; list-style: none">
+            <li>1 ) Make sure notifications are enabled on your computer</li>
+            <li>
+              2 ) Make sure notifications are enabled on your Google Chrome
+              account
+            </li>
+            <li>3 ) Make sure your computer is not on Do Not Disturb</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div
+      class="sub-header"
+      style="text-decoration: underline; font-size: 1.2rem"
+    >
+      Why doesn't my highlighted text show up in the popup?
+    </div>
+    <div class="gif-div">
+      <!-- <div class="how-to-steps" style="align-self: flex-start">
+        Your computer settings may be preventing GptGO from sending a
+        notification. Please make sure the following are true:
+      </div> -->
+      <div class="how-to-steps">
+        <div style="width: 800px">
+          <ul style="gap: 10px; list-style: none">
+            <li>
+              1 ) Refresh the pages that were open prior to GptGO being
+              installed
+            </li>
+            <li>
+              2) Due to the nature of some forms of text, GptGO is unable to
+              retrieve the text you have highlighted. In this case, please copy
+              and paste your desired prompt into the popup
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="header">Terms of Service</div>
+    <div class="gif-div">
+      <div
+        class="how-to-steps"
+        style="height: 500px; overflow-y: scroll; border: solid; padding: 10px"
+      >
+        Welcome to the GptGO Chrome Extension ("GptGO" or the "Extension"). This
+        Extension utilizes the OpenAI Text-Davinci-003 API (the "API") to
+        provide users with advanced text generation capabilities. By using
+        GptGO, you agree to be bound by the following terms and conditions (the
+        "Terms of Service" or "Agreement"). If you do not agree to these terms,
+        do not use GptGO.
+        <br />
+        <br />
+        API Usage and Cost Incurrence
+        <br />
+        <ul>
           <li>
-            2 ) Make sure notifications are enabled on your Google Chrome
-            account
+            GptGo utilizes OpenAI's Text-Davinci-003 API to provide its
+            functionality. OpenAI grants all new users 3 months or $18 of free
+            API usage. After this grant is over, users will need to upgrade to a
+            "pay as you go" subscription in order to continue using GptGO. For
+            users already paying for API usage, search requests from GptGO will
+            incur costs to you. These costs will be incurred by you and are not
+            included in the use of GptGO. You are solely responsible for any and
+            all charges that may be incurred as a result of your use of the API
+            through GptGO.
+            <br />
+            <br />
+            You can always check your current usage at
+            <a
+              href="https://platform.openai.com/account/usage"
+              target="_blank"
+              style="color: white"
+              >https://platform.openai.com/account/usage</a
+            >
           </li>
-          <li>3 ) Make sure your computer is not on Do Not Disturb</li>
-          <div class="test"></div>
         </ul>
+        User Responsibility
+        <br />
+        <ul>
+          <li>
+            You are solely responsible for the content generated by GptGO. You
+            agree not to use GptGO for any illegal or unethical purpose, and you
+            will use the Extension in accordance with all applicable laws. You
+            agree not to use the Extension in any manner that could damage,
+            disable, overburden, or impair the API or interfere with any other
+            party's use and enjoyment of the API.
+          </li>
+        </ul>
+        Disclaimer of Warranties
+        <br />
+        <ul>
+          <li>
+            GptGO and the API are provided on an "as is" and "as available"
+            basis. We make no representations or warranties of any kind, express
+            or implied, as to the operation of GptGO or the API, or the
+            information, content, materials, or products included in GptGO. You
+            expressly agree that your use of GptGO is at your sole risk.
+          </li>
+        </ul>
+        Limitation of Liability
+        <br />
+        <ul>
+          <li>
+            To the fullest extent permitted by law, in no event will we be
+            liable for any damages of any kind arising from the use of GptGO or
+            the API, including, but not limited to, direct, indirect,
+            incidental, punitive, and consequential damages.
+          </li>
+        </ul>
+        Changes to Terms of Service
+        <br />
+        <ul>
+          <li>
+            We reserve the right to modify these Terms of Service at any time.
+            Your continued use of GptGO following any such changes constitutes
+            your acceptance of the new Terms of Service.
+          </li>
+        </ul>
+        Governing Law
+        <br />
+        <ul>
+          <li>
+            This Agreement shall be governed by and construed in accordance with
+            the laws of the jurisdiction in which you reside.
+          </li>
+        </ul>
+        Entire Agreement
+        <br />
+        <ul>
+          <li>
+            These Terms of Service constitute the entire agreement between you
+            and us with respect to the use of GptGO and the API, and supersede
+            all prior or contemporaneous communications and proposals, whether
+            electronic, oral, or written, between you and us with respect to the
+            Extension.
+          </li>
+        </ul>
+        By using GptGO, you agree to be bound by these Terms of Service. If you
+        have any questions regarding these terms, please contact us.
       </div>
     </div>
   </div>

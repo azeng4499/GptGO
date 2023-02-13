@@ -31,15 +31,26 @@ const Main = () => {
     }
   }, [textArea]);
 
-  chrome.storage.onChanged.addListener((changes) => {
-    if (changes.loading && changes.loading.newValue === "false") {
-      chrome.storage.local.get(["response"]).then((response) => {
-        setResponse(response.response[1]);
-        setError(response.response[2]);
-        setLoading(false);
-      });
-    }
-  });
+  useEffect(() => {
+    const logic = (changes) => {
+      if (changes.loading && changes.loading.newValue === "false") {
+        chrome.storage.local.get(["response"]).then((response) => {
+          setResponse(response.response[1]);
+          console.log("response: " + response.response[1]);
+          setError(response.response[2]);
+          setLoading(false);
+        });
+      }
+    };
+
+    chrome.storage.onChanged.addListener((changes) => {
+      logic(changes);
+    });
+
+    return chrome.storage.onChanged.removeListener((changes) => {
+      logic(changes);
+    });
+  }, []);
 
   useEffect(() => {
     chrome.storage.local
@@ -69,6 +80,7 @@ const Main = () => {
       await setStorage("query", textArea);
     }
     await setStorage("loading", "true.frontend");
+    console.log("set loading to true.frontend");
   };
 
   useEffect(() => {
