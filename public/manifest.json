@@ -1,0 +1,33 @@
+{
+  "name": "GptGO - ChatGPT from any tab",
+  "description": "Highlight. Open. Search. It's that easy.",
+  "version": "1.1",
+  "manifest_version": 3,
+  "action": {
+    "default_title": "GptGO - ChatGPT from any tab",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/logo16.png",
+      "32": "images/logo32.png",
+      "192": "images/logo192.png",
+      "512": "images/logo512.png"
+    }
+  },
+  "icons": {
+    "16": "images/logo16.png",
+    "32": "images/logo32.png",
+    "192": "images/logo192.png",
+    "512": "images/logo512.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "contextMenus", "notifications"],
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "options_page": "options/options.html"
+}

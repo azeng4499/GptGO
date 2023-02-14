@@ -29,17 +29,20 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
             await setStorage("query", info.selectionText);
           }
           getResponse(apiKey).then(async (response) => {
-            await setStorage("response", response);
-
-            if (response[2] === false) {
-              sendNotification(
-                "Response to: " + response[0],
-                response[1].replace(/\n/g, "")
-              );
+            if (response == null) {
+              sendNotification("Error!!!", errorMessages.standard);
             } else {
-              sendNotification("Error!!!", response[1]);
+              await setStorage("response", response);
+              if (response[2] === false) {
+                sendNotification(
+                  "Response to: " + response[0],
+                  response[1].replace(/\n/g, "")
+                );
+              } else {
+                sendNotification("Error!!!", response[1]);
+              }
+              await setStorage("loading", "false");
             }
-            await setStorage("loading", "false");
           });
         }
       });
@@ -56,14 +59,68 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.loading && changes.loading.newValue === "true.frontend") {
     getStorage("apiKey").then((apiKey) => {
       getResponse(apiKey).then(async (response) => {
-        await setStorage("response", response);
-        await setStorage("loading", "false");
+        if (response == null) {
+          await setStorage("loading", "false");
+        } else {
+          await setStorage("response", response);
+          await setStorage("loading", "false");
+        }
       });
     });
   }
 });
 
 //#################Helper Func#########################
+
+const getResponse = async (apiKey) => {
+  const query = await getStorage("query");
+
+  if (query && query !== "") {
+    try {
+      let controller = new AbortController();
+      setTimeout(() => controller.abort(), 45000);
+
+      chrome.storage.onChanged.addListener((changes) => {
+        if (changes.abort) {
+          controller.abort();
+        }
+      });
+
+      const res = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + apiKey,
+        },
+        body: JSON.stringify({
+          model: "text-davinci-003",
+          temperature: 0.75,
+          max_tokens: 2000,
+          prompt: "User :\n" + query + "\nChatGPT:\n",
+          stop: "/n",
+        }),
+        signal: controller.signal,
+      });
+
+      if (res == null || (res.status != 200 && res.status != 201)) {
+        if (res && res.status === 429) {
+          return [query, errorMessages.tooManyRequests, true];
+        } else {
+          return [query, errorMessages.standard, true];
+        }
+      } else {
+        const data = await res.json();
+        return [query, data.choices[0].text, false];
+      }
+    } catch (err) {
+      console.log(err);
+      await setStorage("response", [query, errorMessages.abort, true]);
+      return null;
+    }
+  } else {
+    return [query, errorMessages.prompt, true];
+  }
+};
 
 const errorMessages = {
   standard: "A network or API error occurred! Please try again later.",
@@ -92,78 +149,4 @@ const setStorage = async (key, value) => {
   await chrome.storage.local.set({
     [key]: value,
   });
-};
-
-const callAPI = async (query, apiKey) => {
-  let controller = new AbortController();
-  setTimeout(() => controller.abort(), 45000);
-
-  chrome.storage.onChanged.addListener((changes) => {
-    if (changes.abort) {
-      controller.abort();
-    }
-  });
-
-  const params = {
-    model: "text-davinci-003",
-    temperature: 0.75,
-    max_tokens: 2000,
-    prompt: "User :\n" + query + "\nChatGPT:\n",
-    stop: "/n",
-  };
-
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + apiKey,
-    },
-    body: JSON.stringify(params),
-    signal: controller.signal,
-  };
-
-  try {
-    const res = await fetch(
-      "https://api.openai.com/v1/completions",
-      requestOptions
-    );
-    if (res == null || (res.status != 200 && res.status != 201)) {
-      if (res && res.status === 429) {
-        return {
-          response: errorMessages.tooManyRequests,
-          error: true,
-        };
-      } else {
-        return {
-          response: errorMessages.standard,
-          error: true,
-        };
-      }
-    } else {
-      const data = await res.json();
-      return { response: data.choices[0].text, error: false };
-    }
-  } catch (err) {
-    if (err.name == "AbortError") {
-      return { response: errorMessages.abort, error: true };
-    } else {
-      return { response: errorMessages.standard, error: true };
-    }
-  }
-};
-
-const getResponse = async (apiKey) => {
-  const query = await getStorage("query");
-
-  if (query && query !== "") {
-    try {
-      const response = await callAPI(query, apiKey);
-      return [query, response.response, response.error];
-    } catch (err) {
-      console.log(err);
-      return [query, errorMessages.standard, true];
-    }
-  } else {
-    return [query, errorMessages.prompt, true];
-  }
 };

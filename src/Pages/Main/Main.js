@@ -96,8 +96,6 @@ const Main = () => {
 
   const handleCancelRequest = async () => {
     await setStorage("abort", Date.now().toString());
-    await setStorage("response", ["", "", false]);
-    await setStorage("loading", "false");
   };
 
   return (
@@ -170,14 +168,16 @@ const Main = () => {
         </div>
       </div>
       <div className="button-div">
-        <button
-          className="button"
-          type="button"
-          onClick={() => handleSearchRequest()}
-          disabled={loading}
-        >
-          Search
-        </button>
+        {!loading && (
+          <button
+            className="button"
+            type="button"
+            onClick={() => handleSearchRequest()}
+            disabled={loading}
+          >
+            Search
+          </button>
+        )}
       </div>
     </div>
   );
