@@ -8,7 +8,7 @@ function App() {
   const [apiKey, setApiKey] = useState();
 
   const showPage = () => {
-    return apiKey ? <Main /> : <Welcome />;
+    return apiKey ? <Main apiKey={apiKey}/> : <Welcome />;
   };
 
   useEffect(() => {

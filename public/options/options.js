@@ -16,6 +16,9 @@ const callAPI = async () => {
   document.getElementById("status").innerHTML = "Checking key...";
   document.getElementById("status").style.backgroundColor = "orange";
 
+  let controller = new AbortController();
+  setTimeout(() => controller.abort(), 15000);
+
   const params_ = {
     model: "text-davinci-003",
     temperature: 0.7,
@@ -30,19 +33,25 @@ const callAPI = async () => {
       Authorization: "Bearer " + apiKey,
     },
     body: JSON.stringify(params_),
+    signal: controller.signal,
   };
 
-  const response = await fetch(
-    "https://api.openai.com/v1/completions",
-    requestOptions
-  );
+  try {
+    const response = await fetch(
+      "https://api.openai.com/v1/completions",
+      requestOptions
+    );
 
-  if (response.status == 200 || response.status == 201) {
-    document.getElementById("status").innerHTML = "Success, you're all set!";
-    document.getElementById("status").style.backgroundColor = "green";
-    chrome.storage.local.set({ apiKey: apiKey });
-  } else {
-    document.getElementById("status").innerHTML = "Failure, try again.";
+    if (response.status == 200 || response.status == 201) {
+      document.getElementById("status").innerHTML = "Success, you're all set!";
+      document.getElementById("status").style.backgroundColor = "green";
+      chrome.storage.local.set({ apiKey: apiKey });
+    } else {
+      document.getElementById("status").innerHTML = "Failure, try again.";
+      document.getElementById("status").style.backgroundColor = "red";
+    }
+  } catch (err) {
+    document.getElementById("status").innerHTML = "Failure, network error.";
     document.getElementById("status").style.backgroundColor = "red";
   }
 };
@@ -73,6 +82,6 @@ document.addEventListener("mouseup", myFunction);
 function myFunction() {
   value = window.getSelection().toString();
   if (value) {
-    chrome.storage.local.set({ query: value });
+    chrome.storage.local.set({ query: [value, null, false] });
   }
 }

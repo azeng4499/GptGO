@@ -1,3 +1,5 @@
+let controller;
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.runtime.openOptionsPage();
 });
@@ -10,115 +12,105 @@ chrome.contextMenus.remove("3", () => {
   });
 });
 
-chrome.runtime.onMessage.addListener(async function (request) {
-  getStorage("loading").then((loading) => {
-    if (loading == null || loading === "false") {
-      chrome.storage.local.set({ query: request.payload });
-    }
-  });
+chrome.runtime.onMessage.addListener((request, sender, callBack) => {
+  switch (request.type) {
+    case "query":
+      query(request);
+      break;
+    case "callAPI":
+      callAPI(request, callBack);
+      return true;
+    case "abort":
+      controller.abort();
+      break;
+    default:
+      break;
+  }
 });
+
+const callAPI = async (request, callBack) => {
+  await setStorage("loading", "true");
+  await setStorage("query", [request.query, null, false]);
+  const response = await getResponse(request.apiKey, request.query);
+  await setStorage("query", [request.query, response[0], response[1]]);
+  await setStorage("loading", "false");
+  callBack([request.query, response[0], response[1]]);
+};
+
+const query = async (request) => {
+  const loading = await getStorage("loading");
+  if (loading == null || loading === "false") {
+    await setStorage("query", [request.payload, null, false]);
+  }
+};
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
-  getStorage("apiKey").then(async (apiKey) => {
-    if (apiKey) {
-      getStorage("loading").then(async (loading) => {
-        if (loading == null || loading === "false") {
-          await setStorage("loading", "true.backend");
-          const query = await getStorage("query");
-          if (query != info.selectionText) {
-            await setStorage("query", info.selectionText);
-          }
-          getResponse(apiKey).then(async (response) => {
-            if (response == null) {
-              sendNotification("Error!!!", errorMessages.standard);
-            } else {
-              await setStorage("response", response);
-              if (response[2] === false) {
-                sendNotification(
-                  "Response to: " + response[0],
-                  response[1].replace(/\n/g, "")
-                );
-              } else {
-                sendNotification("Error!!!", response[1]);
-              }
-              await setStorage("loading", "false");
-            }
-          });
-        }
-      });
-    } else {
+  const apiKey = await getStorage("apiKey");
+  const loading = await getStorage("loading");
+
+  if (apiKey) {
+    if (loading == null || loading === "false") {
+      await setStorage("loading", "true");
+      await setStorage("query", [info.selectionText, null, false]);
+      const response = await getResponse(apiKey, info.selectionText);
+      await setStorage("query", [info.selectionText, response[0], response[1]]);
+      await setStorage("loading", "false");
+
       sendNotification(
-        "Error!!!",
-        "You need to set up GptGO before sending search requests."
+        response[1] === true
+          ? "Error!!!"
+          : "Response to: " + info.selectionText,
+        response[0].replace(/\n/g, "")
       );
     }
-  });
-});
-
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.loading && changes.loading.newValue === "true.frontend") {
-    getStorage("apiKey").then((apiKey) => {
-      getResponse(apiKey).then(async (response) => {
-        if (response == null) {
-          await setStorage("loading", "false");
-        } else {
-          await setStorage("response", response);
-          await setStorage("loading", "false");
-        }
-      });
-    });
+  } else {
+    sendNotification(
+      "Error!!!",
+      "You need to set up GptGO before sending search requests."
+    );
   }
 });
 
 //#################Helper Func#########################
 
-const getResponse = async (apiKey) => {
-  const query = await getStorage("query");
+const getResponse = async (apiKey, query) => {
+  if (query == null || query.trim() === "") {
+    return [errorMessages.prompt, true];
+  }
 
-  if (query && query !== "") {
-    try {
-      let controller = new AbortController();
-      setTimeout(() => controller.abort(), 45000);
+  controller = new AbortController();
+  setTimeout(() => controller.abort(), 45000);
 
-      chrome.storage.onChanged.addListener((changes) => {
-        if (changes.abort) {
-          controller.abort();
-        }
-      });
+  try {
+    const res = await fetch("https://api.openai.com/v1/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + apiKey,
+      },
+      body: JSON.stringify({
+        model: "text-davinci-003",
+        temperature: 0.75,
+        max_tokens: 2000,
+        prompt: "User :\n" + query + "\nChatGPT:\n",
+        stop: "/n",
+      }),
+      signal: controller.signal,
+    });
 
-      const res = await fetch("https://api.openai.com/v1/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + apiKey,
-        },
-        body: JSON.stringify({
-          model: "text-davinci-003",
-          temperature: 0.75,
-          max_tokens: 2000,
-          prompt: "User :\n" + query + "\nChatGPT:\n",
-          stop: "/n",
-        }),
-        signal: controller.signal,
-      });
-
-      if (res == null || (res.status != 200 && res.status != 201)) {
-        if (res && res.status === 429) {
-          return [query, errorMessages.tooManyRequests, true];
-        } else {
-          return [query, errorMessages.standard, true];
-        }
+    if (res == null || (res.status != 200 && res.status != 201)) {
+      if (res && res.status === 429) {
+        return [errorMessages.tooManyRequests, true];
       } else {
-        const data = await res.json();
-        return [query, data.choices[0].text, false];
+        return [errorMessages.standard, true];
       }
-    } catch (err) {
-      console.log(err);
-      await setStorage("response", [query, errorMessages.abort, true]);
-      return null;
+    } else {
+      const data = await res.json();
+      return [data.choices[0].text, false];
     }
-  } else {
-    return [query, errorMessages.prompt, true];
+  } catch (err) {
+    console.log(err);
+    return [errorMessages.abort, true];
   }
 };
 

@@ -10,92 +10,70 @@ import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 
-const Main = () => {
+const Main = ({ apiKey }) => {
   const [query, setQuery] = useState();
   const [response, setResponse] = useState();
   const [loading, setLoading] = useState(false);
-  const [textArea, setTextArea] = useState(null);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
 
-  const setStorage = async (field, data) => {
-    await chrome.storage.local.set({ [field]: data });
+  const getStorage = async (key) => {
+    const response = await chrome.storage.local.get([key]);
+    const value = response[key];
+    return value;
   };
 
   useEffect(() => {
     if (ref.current.clientHeight !== height) {
       setHeight(ref.current.clientHeight);
     }
-  }, [textArea]);
+  }, [query]);
 
-  useEffect(() => {
-    const logic = (changes) => {
-      if (changes.loading && changes.loading.newValue === "false") {
-        chrome.storage.local.get(["response"]).then((response) => {
-          if (response[0] === query) {
-            setResponse(response.response[1]);
-            setError(response.response[2]);
-            setLoading(false);
-          }
-        });
+  useEffect(async () => {
+    const query = await getStorage("query");
+    const loading = await getStorage("loading");
+
+    if (query != null) {
+      setQuery(query[0]);
+      if (loading != null && loading === "true") {
+        setLoading(true);
+      } else {
+        setLoading(false);
       }
-    };
-
-    chrome.storage.onChanged.addListener((changes) => {
-      logic(changes);
-    });
-
-    return chrome.storage.onChanged.removeListener((changes) => {
-      logic(changes);
-    });
-  }, []);
-
-  useEffect(() => {
-    chrome.storage.local
-      .get(["query", "response", "loading"])
-      .then((result) => {
-        if (result.loading == null || result.loading === "false") {
-          setLoading(false);
-        } else {
-          setLoading(true);
-        }
-        if (result.query) {
-          setQuery(result.query);
-          setTextArea(result.query);
-          if (result.response[0] === result.query) {
-            setResponse(result.response[1]);
-            setError(result.response[2]);
-          }
-        }
-      });
+      if (query[1] != null) {
+        setResponse(query[1]);
+        setError(query[2]);
+      }
+    }
   }, []);
 
   const handleSearchRequest = async () => {
     setLoading(true);
-    if (textArea !== query) {
-      setQuery(textArea);
-      await setStorage("query", textArea);
-    }
-    await setStorage("loading", "true.frontend");
+    chrome.runtime.sendMessage(
+      {
+        query: query,
+        apiKey: apiKey,
+        type: "callAPI",
+      },
+      (response) => {
+        setQuery(response[0]);
+        setResponse(response[1]);
+        setError(response[2]);
+        setLoading(false);
+      }
+    );
   };
 
-  useEffect(() => {
-    const callback = (event) => {
-      if (event.shiftKey && event.metaKey) {
-        handleSearchRequest();
-      }
-    };
-    window.addEventListener("keydown", callback);
-    return () => {
-      window.removeEventListener("keydown", callback);
-    };
-  });
-
   const handleCancelRequest = async () => {
-    await setStorage("abort", Date.now().toString());
+    chrome.runtime.sendMessage(
+      {
+        type: "abort",
+      },
+      null
+    );
   };
 
   return (
@@ -124,7 +102,7 @@ const Main = () => {
             if (response) {
               setResponse(null);
             }
-            setTextArea(e.target.value);
+            setQuery(e.target.value);
           }}
         />
       </div>
