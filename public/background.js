@@ -34,6 +34,14 @@ const callAPI = async (request, callBack) => {
   const response = await getResponse(request.apiKey, request.query);
   await setStorage("query", [request.query, response[0], response[1]]);
   await setStorage("loading", "false");
+  // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  //   console.log(tabs);
+  //   chrome.tabs.sendMessage(
+  //     tabs[0].id,
+  //     { action: "open_dialog_box" },
+  //     function (response) {}
+  //   );
+  // });
   callBack([request.query, response[0], response[1]]);
 };
 
@@ -62,6 +70,8 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
           : "Response to: " + info.selectionText,
         response[0].replace(/\n/g, "")
       );
+
+      await setStorage("notifReady", Date.now().toString());
     }
   } else {
     sendNotification(

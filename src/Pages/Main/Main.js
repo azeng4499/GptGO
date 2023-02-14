@@ -20,6 +20,12 @@ const Main = ({ apiKey }) => {
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
 
+  const setStorage = async (key, value) => {
+    await chrome.storage.local.set({
+      [key]: value,
+    });
+  };
+
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
     const value = response[key];
@@ -33,6 +39,16 @@ const Main = ({ apiKey }) => {
   }, [query]);
 
   useEffect(async () => {
+    await setInfo();
+  }, []);
+
+  chrome.storage.onChanged.addListener((changed) => {
+    if (changed.notifReady) {
+      setInfo();
+    }
+  });
+
+  const setInfo = async () => {
     const query = await getStorage("query");
     const loading = await getStorage("loading");
 
@@ -48,7 +64,7 @@ const Main = ({ apiKey }) => {
         setError(query[2]);
       }
     }
-  }, []);
+  };
 
   const handleSearchRequest = async () => {
     setLoading(true);
@@ -74,6 +90,8 @@ const Main = ({ apiKey }) => {
       },
       null
     );
+    await setStorage("loading", false);
+    setLoading("false");
   };
 
   return (
