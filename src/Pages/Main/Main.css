@@ -1,7 +1,7 @@
 .main-div {
   background-color: #23272f;
   width: 400px;
-  height: 500px;
+  height: 600px;
   top: 0px;
   left: 0px;
   right: 0px;
@@ -111,6 +111,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .response-text {
@@ -179,4 +181,13 @@ button:hover {
 
 .pre::-webkit-scrollbar {
   display: none;
+}
+
+.cancel-button {
+  color: #fff;
+  font-family: "Prompt", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px 0px;
+  border-bottom: solid;
 }

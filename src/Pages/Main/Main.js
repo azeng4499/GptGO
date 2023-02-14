@@ -22,7 +22,7 @@ const Main = () => {
   const [clipboard, setClipboard] = useClippy();
 
   const setStorage = async (field, data) => {
-    chrome.storage.local.set({ [field]: data });
+    await chrome.storage.local.set({ [field]: data });
   };
 
   useEffect(() => {
@@ -35,10 +35,11 @@ const Main = () => {
     const logic = (changes) => {
       if (changes.loading && changes.loading.newValue === "false") {
         chrome.storage.local.get(["response"]).then((response) => {
-          setResponse(response.response[1]);
-          console.log("response: " + response.response[1]);
-          setError(response.response[2]);
-          setLoading(false);
+          if (response[0] === query) {
+            setResponse(response.response[1]);
+            setError(response.response[2]);
+            setLoading(false);
+          }
         });
       }
     };
@@ -74,13 +75,11 @@ const Main = () => {
 
   const handleSearchRequest = async () => {
     setLoading(true);
-
     if (textArea !== query) {
       setQuery(textArea);
       await setStorage("query", textArea);
     }
     await setStorage("loading", "true.frontend");
-    console.log("set loading to true.frontend");
   };
 
   useEffect(() => {
@@ -94,6 +93,12 @@ const Main = () => {
       window.removeEventListener("keydown", callback);
     };
   });
+
+  const handleCancelRequest = async () => {
+    await setStorage("abort", Date.now().toString());
+    await setStorage("response", ["", "", false]);
+    await setStorage("loading", "false");
+  };
 
   return (
     <div className="main-div">
@@ -125,7 +130,7 @@ const Main = () => {
           }}
         />
       </div>
-      <div className="answer-container" style={{ height: 335 - height }}>
+      <div className="answer-container" style={{ height: 435 - height }}>
         <div className="answer-div">
           <div className="response-label">
             Response:
@@ -145,6 +150,12 @@ const Main = () => {
             {loading ? (
               <div className="circle-div">
                 <Circles className="circles" />
+                <div
+                  className="cancel-button"
+                  onClick={() => handleCancelRequest()}
+                >
+                  Cancel
+                </div>
               </div>
             ) : response && !error ? (
               <div>

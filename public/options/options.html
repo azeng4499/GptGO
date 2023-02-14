@@ -46,11 +46,28 @@
         </ul>
       </div>
       <div style="display: flex; margin-bottom: 10px; gap: 10px">
-        <input type="checkbox" id="checkbox" />
+        <input type="checkbox" id="checkbox1" />
         <div>I have read and understand the Terms of Service</div>
       </div>
-      <div class="input-group">
-        <input type="password" id="apiInput" />
+      <div
+        style="
+          display: flex;
+          margin-bottom: 10px;
+          gap: 10px;
+          align-items: flex-start;
+        "
+      >
+        <input type="checkbox" id="checkbox2" />
+        <div style="width: 760px">
+          I understand that GptGo utilizes OpenAI's Text-Davinci-003 API to
+          provide its functionality. OpenAI grants all new users 3 months or $18
+          of free API usage. After this grant is over, users will need to
+          upgrade to a "pay as you go" subscription in order to continue using
+          GptGO. This is a result of OpenAI's policy and will not benefit GptGO.
+        </div>
+      </div>
+      <div class="input-group" style="padding-left: 30px">
+        <input type="password" id="apiInput" style="font-size: large;"/>
         <button type="button" id="submitButton">Submit</button>
         <div id="status"></div>
       </div>
@@ -192,11 +209,7 @@
         <br />
         <ul>
           <li>
-            GptGo utilizes OpenAI's Text-Davinci-003 API to provide its
-            functionality. OpenAI grants all new users 3 months or $18 of free
-            API usage. After this grant is over, users will need to upgrade to a
-            "pay as you go" subscription in order to continue using GptGO. For
-            users already paying for API usage, search requests from GptGO will
+            For users paying for API usage, search requests from GptGO will
             incur costs to you. These costs will be incurred by you and are not
             included in the use of GptGO. You are solely responsible for any and
             all charges that may be incurred as a result of your use of the API

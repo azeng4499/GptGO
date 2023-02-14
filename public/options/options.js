@@ -1,11 +1,12 @@
 async function submitApiKey() {
-  const checked = document.getElementById("checkbox").checked;
+  const checked1 = document.getElementById("checkbox1").checked;
+  const checked2 = document.getElementById("checkbox2").checked;
 
-  if (checked) {
+  if (checked1 && checked2) {
     callAPI();
   } else {
     document.getElementById("status").innerHTML =
-      "Failure, Terms of Service checkbox required.";
+      "Failure, checkboxes required.";
     document.getElementById("status").style.backgroundColor = "red";
   }
 }
@@ -49,7 +50,8 @@ const callAPI = async () => {
 function loadDataIfPresent() {
   chrome.storage.local.get(["apiKey"]).then((response) => {
     if (response.apiKey) {
-      document.getElementById("checkbox").checked = true;
+      document.getElementById("checkbox1").checked = true;
+      document.getElementById("checkbox2").checked = true;
       document.getElementById("apiInput").value = response.apiKey;
       document.getElementById("status").innerHTML = "Success, you're all set!";
       document.getElementById("status").style.backgroundColor = "green";

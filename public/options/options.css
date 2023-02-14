@@ -7,7 +7,7 @@
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  min-height: 2150px;
+  min-height: 2300px;
   /* background: rgb(0, 177, 136);
   background: linear-gradient(
     90deg,
@@ -19,7 +19,7 @@
 .input-group {
   display: flex;
   height: 30px;
-  width: 800px;
+  width: 770px;
   gap: 20px;
   justify-content: flex-start;
   align-items: center;
@@ -27,7 +27,7 @@
 }
 
 #apiInput {
-  width: 300px;
+  width: 325px;
 }
 
 .setup-steps {
