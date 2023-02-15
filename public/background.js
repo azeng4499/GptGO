@@ -34,14 +34,6 @@ const callAPI = async (request, callBack) => {
   const response = await getResponse(request.apiKey, request.query);
   await setStorage("query", [request.query, response[0], response[1]]);
   await setStorage("loading", "false");
-  // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  //   console.log(tabs);
-  //   chrome.tabs.sendMessage(
-  //     tabs[0].id,
-  //     { action: "open_dialog_box" },
-  //     function (response) {}
-  //   );
-  // });
   callBack([request.query, response[0], response[1]]);
 };
 
@@ -89,7 +81,7 @@ const getResponse = async (apiKey, query) => {
   }
 
   controller = new AbortController();
-  setTimeout(() => controller.abort(), 45000);
+  setTimeout(() => controller.abort(), 60000);
 
   try {
     const res = await fetch("https://api.openai.com/v1/completions", {
@@ -119,8 +111,11 @@ const getResponse = async (apiKey, query) => {
       return [data.choices[0].text, false];
     }
   } catch (err) {
-    console.log(err);
-    return [errorMessages.abort, true];
+    if (err.name == "AbortError") {
+      return [errorMessages.abort, true];
+    } else {
+      return [errorMessages.abort, true];
+    }
   }
 };
 
@@ -130,6 +125,8 @@ const errorMessages = {
   tooManyRequests:
     "ChatGPT limits the request rates of free users. Please wait a minute before sending another request.",
   abort: "User aborted search.",
+  timeout:
+    "A timeout error occurred. ChatGPT may be over capacity right now. Please try again later.",
 };
 
 const sendNotification = (query, response) => {
