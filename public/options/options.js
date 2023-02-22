@@ -1,12 +1,10 @@
 async function submitApiKey() {
-  const checked1 = document.getElementById("checkbox1").checked;
-  const checked2 = document.getElementById("checkbox2").checked;
+  const checked = document.getElementById("checkbox").checked;
 
-  if (checked1 && checked2) {
+  if (checked) {
     callAPI();
   } else {
-    document.getElementById("status").innerHTML =
-      "Failure, checkboxes required.";
+    document.getElementById("status").innerHTML = "Failure, checkbox required.";
     document.getElementById("status").style.backgroundColor = "red";
   }
 }
@@ -59,8 +57,7 @@ const callAPI = async () => {
 function loadDataIfPresent() {
   chrome.storage.local.get(["apiKey"]).then((response) => {
     if (response.apiKey) {
-      document.getElementById("checkbox1").checked = true;
-      document.getElementById("checkbox2").checked = true;
+      document.getElementById("checkbox").checked = true;
       document.getElementById("apiInput").value = response.apiKey;
       document.getElementById("status").innerHTML = "Success, you're all set!";
       document.getElementById("status").style.backgroundColor = "green";
@@ -68,12 +65,42 @@ function loadDataIfPresent() {
   });
 }
 
+const faq = (num) => {
+  let expandText = "expandText" + num;
+  let faq = "faq" + num;
+  const state = document.getElementById(expandText).innerHTML;
+  style = window.getComputedStyle(document.getElementById("main"));
+  height = style.getPropertyValue("min-height");
+  height = height.substring(0, height.length - 2);
+  height = parseInt(height);
+
+  if (state === "+") {
+    height += 110;
+    document.getElementById(faq).style.display = "flex";
+    document.getElementById(expandText).innerHTML = "-";
+  } else {
+    height -= 110;
+    document.getElementById(faq).style.display = "none";
+    document.getElementById(expandText).innerHTML = "+";
+  }
+  document.getElementById("main").style.minHeight = height.toString() + "px";
+};
+
 (function () {
   document.addEventListener("DOMContentLoaded", function () {
     loadDataIfPresent();
     document
       .getElementById("submitButton")
       .addEventListener("click", submitApiKey);
+    document.getElementById("expand1").addEventListener("click", () => {
+      faq("1");
+    });
+    document.getElementById("expand2").addEventListener("click", () => {
+      faq("2");
+    });
+    document.getElementById("expand3").addEventListener("click", () => {
+      faq("3");
+    });
   });
 })();
 

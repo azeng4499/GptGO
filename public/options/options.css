@@ -7,7 +7,8 @@
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  min-height: 2275px;
+  min-height: 2350px;
+  min-width: 850px;
   /* background: rgb(0, 177, 136);
   background: linear-gradient(
     90deg,
@@ -114,4 +115,37 @@ html {
   color: #fff;
   border: solid;
   border-radius: 5px;
+}
+
+.faq {
+  width: 800px;
+  font-size: 1rem;
+  color: #fff;
+  font-style: italic;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.expand {
+  font-size: 1.5rem;
+  /* background-color: #00b188; */
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #fff;
+  border: solid;
+}
+
+.api-usage {
+  width: 800px;
+  background-color: #0082b1;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  margin-top: 5px;
+  border: solid;
+  color: #fff;
 }

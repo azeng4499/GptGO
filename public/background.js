@@ -1,5 +1,14 @@
 let controller;
 
+const errorMessages = {
+  standard: "A network or API error occurred! Please try again later.",
+  prompt: "Invalid prompt.",
+  tooManyRequests:
+    "ChatGPT denied this request. Please wait a minute before sending another request. If this keeps happening, click the ? and visit the API Usage section.",
+  abort: "User aborted search.",
+  timeout: "ChatGPT isn't responding right now. Please try again later.",
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.runtime.openOptionsPage();
 });
@@ -21,7 +30,7 @@ chrome.runtime.onMessage.addListener((request, sender, callBack) => {
       callAPI(request, callBack);
       return true;
     case "abort":
-      controller.abort();
+      controller.abort("user");
       break;
     default:
       break;
@@ -81,7 +90,7 @@ const getResponse = async (apiKey, query) => {
   }
 
   controller = new AbortController();
-  setTimeout(() => controller.abort(), 60000);
+  setTimeout(() => controller.abort("timeout"), 60000);
 
   try {
     const res = await fetch("https://api.openai.com/v1/completions", {
@@ -94,8 +103,7 @@ const getResponse = async (apiKey, query) => {
         model: "text-davinci-003",
         temperature: 0.75,
         max_tokens: 2000,
-        prompt: "User :\n" + query + "\nChatGPT:\n",
-        stop: "/n",
+        prompt: "You are ChatGPT.\nUser: " + query + "\nChatGPT: ",
       }),
       signal: controller.signal,
     });
@@ -111,22 +119,15 @@ const getResponse = async (apiKey, query) => {
       return [data.choices[0].text, false];
     }
   } catch (err) {
-    if (err.name == "AbortError") {
+    console.log(err);
+    if (controller.signal.reason == "timeout") {
+      return [errorMessages.timeout, true];
+    } else if (controller.signal.reason == "user") {
       return [errorMessages.abort, true];
     } else {
-      return [errorMessages.abort, true];
+      return [errorMessages.standard, true];
     }
   }
-};
-
-const errorMessages = {
-  standard: "A network or API error occurred! Please try again later.",
-  prompt: "Invalid prompt.",
-  tooManyRequests:
-    "ChatGPT limits the request rates of free users. Please wait a minute before sending another request.",
-  abort: "User aborted search.",
-  timeout:
-    "A timeout error occurred. ChatGPT may be over capacity right now. Please try again later.",
 };
 
 const sendNotification = (query, response) => {

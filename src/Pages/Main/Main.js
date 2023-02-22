@@ -38,8 +38,8 @@ const Main = ({ apiKey }) => {
     }
   }, [query]);
 
-  useEffect(async () => {
-    await setInfo();
+  useEffect(() => {
+    setInfo();
   }, []);
 
   chrome.storage.onChanged.addListener((changed) => {
@@ -91,8 +91,24 @@ const Main = ({ apiKey }) => {
       null
     );
     await setStorage("loading", false);
-    setLoading("false");
+
+    //Not sure why this is neccessary but it's a failsafe
+    setResponse("User aborted search.");
+    setError(true);
+    setLoading(false);
   };
+
+  useEffect(() => {
+    const callback = (event) => {
+      if (event.key == "Enter" && !event.shiftKey) {
+        handleSearchRequest();
+      }
+    };
+    window.addEventListener("keydown", callback);
+    return () => {
+      window.removeEventListener("keydown", callback);
+    };
+  });
 
   return (
     <div className="main-div">

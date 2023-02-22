@@ -14,7 +14,7 @@
   <script src="options.js"></script>
 </head>
 <body>
-  <div class="main">
+  <div class="main" id="main">
     <div class="logo-div">
       <img src="../images/gptGO-logo.png" class="logo" />
     </div>
@@ -24,47 +24,29 @@
     </div>
     <div class="setup-steps">
       <div style="border: solid; margin-bottom: 10px; background: #0082b1">
-        <ul style="gap: 10px; list-style: none">
+        <ul style="gap: 10px">
           <li>
-            1 ) Go to
+            Go to your OpenAI
             <a
               href="https://platform.openai.com/account/api-keys"
               target="_blank"
               style="color: white"
-              >https://platform.openai.com/account/api-keys</a
+              >account api-keys page</a
             >
+            and log in or create an account
           </li>
-          <li>2 ) Log into your OpenAI Account</li>
-          <li>3 ) Click on "Create new secret key"</li>
-          <li>4 ) Copy the key and paste it below</li>
+          <li>Click on "Create new secret key"</li>
+          <li>Copy and paste the key below</li>
           <li>
-            5 ) Read the Terms of Service located at the bottom of this page
-          </li>
-          <li>
-            <div style="margin-bottom: 10px">6 ) Click submit</div>
+            <div style="margin-bottom: 10px">Click submit</div>
           </li>
         </ul>
       </div>
       <div style="display: flex; margin-bottom: 10px; gap: 10px">
-        <input type="checkbox" id="checkbox1" />
-        <div>I have read and understand the Terms of Service</div>
-      </div>
-      <div
-        style="
-          display: flex;
-          margin-bottom: 10px;
-          gap: 10px;
-          align-items: flex-start;
-        "
-      >
-        <input type="checkbox" id="checkbox2" />
-        <div style="width: 760px">
-          I understand that GptGo utilizes OpenAI's Text-Davinci-003 API to
-          provide its functionality. OpenAI grants all new users 3 months or $18
-          of free API usage. After this grant is over, users will need to
-          upgrade to a "pay as you go" subscription in order to continue using
-          GptGO. This is a result of OpenAI's policy and does not monetarily
-          benefit GptGO.
+        <input type="checkbox" id="checkbox" />
+        <div>
+          I have read and understand the Terms of Service
+          <span style="text-decoration: underline">AND</span> API Usage sections
         </div>
       </div>
       <div class="input-group" style="padding-left: 30px">
@@ -80,14 +62,14 @@
     <div class="gif-div">
       <div class="how-to-steps">
         <div style="border: solid; margin-bottom: 10px; background: #0082b1">
-          <ul style="gap: 10px; list-style: none">
-            <li>1 ) Highlight any section of text with your cursor</li>
+          <ul style="gap: 10px">
+            <li>Highlight any section of text with your cursor</li>
             <li>
-              2 ) Right click and select "Search text and get response as
+              Right click and select "Search text and get response as
               notification"
             </li>
             <li>
-              3 ) Within a few seconds, you should receive a notification with
+              Within a few seconds, you should receive a notification with
               ChatGPT's response
             </li>
           </ul>
@@ -105,17 +87,17 @@
     <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
       To read longer responses and search custom prompts, use the GptGO popup:
     </div>
-    <div class="gif-div">
+    <div class="gif-div" style="margin-bottom: 10px">
       <div class="how-to-steps">
         <div style="border: solid; margin-bottom: 10px; background: #0082b1">
-          <ul style="gap: 10px; list-style: none">
-            <li>1 ) Highlight any section of text with your cursor</li>
+          <ul style="gap: 10px">
+            <li>Highlight any section of text with your cursor</li>
             <li>
-              2 ) Click on the puzzle piece from the top right of your browser
+              Click on the puzzle piece from the top right of your browser
             </li>
-            <li>3 ) Select GptGO from the list, the popup should open</li>
-            <li>4 ) If needed, edit your prompt</li>
-            <li>5 ) Click the search button</li>
+            <li>Select GptGO from the list, the popup should open</li>
+            <li>If needed, edit your prompt</li>
+            <li>Click the search button or hit ENTER</li>
           </ul>
         </div>
         <div class="test">
@@ -129,54 +111,173 @@
       </div>
     </div>
     <div class="header">Troubleshooting FAQ</div>
-    <div
-      class="sub-header"
-      style="text-decoration: underline; font-size: 1.2rem"
-    >
-      Why am I not getting a notification from Quick Search?
+    <div class="faq">
+      <div>Why am I not getting a notification from Quick Search?</div>
+      <div class="expand" id="expand1">
+        <div id="expandText1">+</div>
+      </div>
     </div>
-    <div class="gif-div">
+    <div
+      class="gif-div"
+      style="display: none; background-color: #0082b1"
+      id="faq1"
+    >
       <div class="how-to-steps">
-        <div style="width: 800px">
-          <ul style="gap: 10px; list-style: none">
-            <li>1 ) Make sure notifications are enabled on your computer</li>
+        <div style="width: 800px; border: solid; color: #fff">
+          <ul style="gap: 10px">
+            <li>Make sure notifications are enabled on your computer</li>
             <li>
-              2 ) Make sure notifications are enabled on your Google Chrome
-              account
+              Make sure notifications are enabled on your Google Chrome account
             </li>
-            <li>3 ) Make sure your computer is not on Do Not Disturb</li>
+            <li>Make sure your computer is not on Do Not Disturb</li>
           </ul>
         </div>
       </div>
     </div>
-    <div
-      class="sub-header"
-      style="text-decoration: underline; font-size: 1.2rem"
-    >
-      Why doesn't my highlighted text show up in the popup?
+    <div class="faq">
+      <div>Why doesn't my highlighted text show up in the popup?</div>
+      <div class="expand" id="expand2">
+        <div id="expandText2">+</div>
+      </div>
     </div>
-    <div class="gif-div">
+    <div
+      class="gif-div"
+      style="display: none; background-color: #0082b1"
+      id="faq2"
+    >
       <div class="how-to-steps">
-        <div style="width: 800px">
-          <ul style="gap: 10px; list-style: none">
+        <div style="width: 800px; border: solid; color: #fff">
+          <ul style="gap: 10px">
             <li>
-              1 ) Refresh the pages that were open prior to GptGO being
-              installed
+              Refresh the pages that were open prior to GptGO being installed
             </li>
             <li>
-              2) Due to the nature of some forms of text, GptGO is unable to
-              retrieve the text you have highlighted. In this case, please copy
-              and paste your desired prompt into the popup
+              <div style="display: flex; gap: 3px">
+                <div>
+                  Due to the nature of some forms of text, GptGO is unable to
+                  retrieve the text you have highlighted. In this case, please
+                  copy and paste your desired prompt into the popup
+                </div>
+              </div>
             </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="header">Terms of Service</div>
+    <div class="faq">
+      <div>Why do I keep get errors when I send search requests?</div>
+      <div class="expand" id="expand3">
+        <div id="expandText3">+</div>
+      </div>
+    </div>
+    <div
+      class="gif-div"
+      style="display: none; background-color: #0082b1"
+      id="faq3"
+    >
+      <div class="how-to-steps">
+        <div style="width: 800px; border: solid; color: #fff">
+          <ul style="gap: 10px">
+            <li>
+              ChatGPT may be down, or you may have used up your free grant given
+              by OpenAI
+            </li>
+            <li>
+              To check your usage, visit your
+              <a
+                href="https://platform.openai.com/account/usage"
+                target="_blank"
+                style="color: white"
+                >account usage page</a
+              >
+            </li>
+            <li>
+              <div style="display: flex; gap: 5px; width: 650px">
+                <div>
+                  If you have used up your grant, visit the API Usage section to
+                  learn more about how and why you should switch to a "pay as
+                  you go" subscription
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="header" style="margin-top: 10px">API Usage</div>
+    <div class="gif-div">
+      <div class="how-to-steps">
+        <div style="width: 800px">
+          GptGO utilizes OpenAI's Text-Davinci-003 API, which grants all new
+          users 3 months or $18 of free API usage. After that, users will need
+          to upgrade to a "pay as you go" subscription. You can check your
+          current API usage on your
+          <a
+            href="https://platform.openai.com/account/usage"
+            target="_blank"
+            style="color: white"
+            >account usage page</a
+          >
+          <br />
+          <br />
+          <span style="font-weight: 800; color: #fff; background-color: #00b188"
+            >To clarify, GptGO will always be free</span
+          >
+          but users must pay OpenAI to continue making search requests to
+          ChatGPT after their free usage grant has expired.
+          <br />
+          <br />
+          Benefits of a "pay as you go" subscription include:
+          <div class="api-usage">
+            <ul>
+              <li>
+                <span style="text-decoration: underline">Accessibility:</span>
+                &nbsp;use ChatGPT even when the website is overloaded with
+                traffic!
+              </li>
+              <li>
+                <span style="text-decoration: underline">Convenience:</span
+                >&nbsp;never open a new tab or log in to use ChatGPT again!
+              </li>
+              <li>
+                <span style="text-decoration: underline">Affordability:</span
+                >&nbsp;only pay for what you need, most users only pay $3 to $5
+                per month!
+              </li>
+            </ul>
+          </div>
+          <br />
+          Ready to commit? Follow the steps below to switch to a paid
+          subscription:
+          <div class="api-usage">
+            <ul>
+              <li>
+                Go to your OpenAI
+                <a
+                  href="https://platform.openai.com/account/billing/overview"
+                  target="_blank"
+                  style="color: white"
+                  >account billing page</a
+                >
+                and log in
+              </li>
+              <li>
+                Click on "Set up paid account" and complete the payment form
+              </li>
+              <li>
+                Congrats! You now have a paid subscription and can use GptGO
+                forever
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="header" style="margin-top: 10px">Terms of Service</div>
     <div class="gif-div">
       <div
         class="how-to-steps"
-        style="height: 500px; overflow-y: scroll; border: solid; padding: 10px"
+        style="height: 300px; overflow-y: scroll; border: solid; padding: 10px"
       >
         Welcome to the GptGO Chrome Extension ("GptGO" or the "Extension"). This
         Extension utilizes the OpenAI Text-Davinci-003 API (the "API") to
@@ -195,15 +296,6 @@
             included in the use of GptGO. You are solely responsible for any and
             all charges that may be incurred as a result of your use of the API
             through GptGO.
-            <br />
-            <br />
-            You can always check your current usage at
-            <a
-              href="https://platform.openai.com/account/usage"
-              target="_blank"
-              style="color: white"
-              >https://platform.openai.com/account/usage</a
-            >
           </li>
         </ul>
         User Responsibility
