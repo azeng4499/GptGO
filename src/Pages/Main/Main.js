@@ -14,17 +14,12 @@ const Main = ({ apiKey }) => {
   const [query, setQuery] = useState();
   const [response, setResponse] = useState();
   const [loading, setLoading] = useState(false);
+  const [ended, setEnded] = useState(true);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
-
-  const setStorage = async (key, value) => {
-    await chrome.storage.local.set({
-      [key]: value,
-    });
-  };
 
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
@@ -42,9 +37,27 @@ const Main = ({ apiKey }) => {
     setInfo();
   }, []);
 
-  chrome.storage.onChanged.addListener((changed) => {
+  chrome.storage.onChanged.addListener(async (changed) => {
     if (changed.notifReady) {
       setInfo();
+    } else if (changed.query) {
+      const loading = await getStorage("loading");
+      if (loading === "true") {
+        const query = await getStorage("query");
+        const response = query[1];
+        const error = query[2];
+        if (response != null) {
+          setLoading(false);
+          setError(error);
+          setResponse(response);
+        }
+      }
+    } else if (changed.loading) {
+      if (changed.loading.newValue === "false") {
+        setEnded(true);
+      } else {
+        setEnded(false);
+      }
     }
   });
 
@@ -56,8 +69,10 @@ const Main = ({ apiKey }) => {
       setQuery(query[0]);
       if (loading != null && loading === "true") {
         setLoading(true);
+        setEnded(false);
       } else {
         setLoading(false);
+        setEnded(true);
       }
       if (query[1] != null) {
         setResponse(query[1]);
@@ -67,6 +82,7 @@ const Main = ({ apiKey }) => {
   };
 
   const handleSearchRequest = async () => {
+    setResponse(null);
     setLoading(true);
     chrome.runtime.sendMessage(
       {
@@ -74,12 +90,7 @@ const Main = ({ apiKey }) => {
         apiKey: apiKey,
         type: "callAPI",
       },
-      (response) => {
-        setQuery(response[0]);
-        setResponse(response[1]);
-        setError(response[2]);
-        setLoading(false);
-      }
+      null
     );
   };
 
@@ -90,17 +101,11 @@ const Main = ({ apiKey }) => {
       },
       null
     );
-    await setStorage("loading", false);
-
-    //Not sure why this is neccessary but it's a failsafe
-    setResponse("User aborted search.");
-    setError(true);
-    setLoading(false);
   };
 
   useEffect(() => {
     const callback = (event) => {
-      if (event.key == "Enter" && !event.shiftKey) {
+      if (event.key === "Enter" && !event.shiftKey) {
         handleSearchRequest();
       }
     };
@@ -144,9 +149,9 @@ const Main = ({ apiKey }) => {
         <div className="answer-div">
           <div className="response-label">
             Response:
-            {!loading && copied && !error ? (
+            {ended && copied && !error ? (
               <AiFillCheckCircle className="copy" />
-            ) : !loading && !copied && !error ? (
+            ) : ended && !copied && !error ? (
               <RxCopy
                 className="copy"
                 onClick={() => {
@@ -160,12 +165,6 @@ const Main = ({ apiKey }) => {
             {loading ? (
               <div className="circle-div">
                 <Circles className="circles" />
-                <div
-                  className="cancel-button"
-                  onClick={() => handleCancelRequest()}
-                >
-                  Cancel
-                </div>
               </div>
             ) : response && !error ? (
               <div>
@@ -180,14 +179,21 @@ const Main = ({ apiKey }) => {
         </div>
       </div>
       <div className="button-div">
-        {!loading && (
+        {ended ? (
           <button
             className="button"
             type="button"
             onClick={() => handleSearchRequest()}
-            disabled={loading}
           >
             Search
+          </button>
+        ) : (
+          <button
+            className="button-disabled"
+            type="button"
+            onClick={() => handleCancelRequest()}
+          >
+            Cancel
           </button>
         )}
       </div>

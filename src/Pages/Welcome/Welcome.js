@@ -3,26 +3,38 @@
 import React from "react";
 import "./Welcome.css";
 import gptGOLogo from "../../gptGO-logo.png";
+import LogIn from "../../log-in.svg";
 
 const Welcome = () => {
   return (
     <div className="main-div-welcome">
       <img src={gptGOLogo} className="logo-welcome" alt="logo-welcome" />
-      <div className="header1-text">Welcome!</div>
-      <div className="header2-wrapper">
-        <div className="header2-text">
-          Looks like you haven't setup yet. Please visit our settings page to
-          get started.
-        </div>
-      </div>
-      <button
-        onClick={() => {
-          chrome.runtime.openOptionsPage();
+
+      <img
+        src={LogIn}
+        style={{
+          height: "200px",
+          width: "200px",
+          objectFit: "contain",
+          marginBottom: "50px",
         }}
+      />
+
+      <div className="header2-text">Please log into ChatGPT</div>
+      <button
         className="button-welcome"
+        onClick={() => {
+          window.open("https://chat.openai.com/auth/login", "_blank");
+        }}
       >
-        Let's go
+        Log In
       </button>
+      <div
+        className="header2-text"
+        style={{ fontSize: "0.8rem", maxWidth: "calc(100% - 140px)" }}
+      >
+        Once you log in, you can safely close the tab and use GptGO
+      </div>
     </div>
   );
 };

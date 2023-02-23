@@ -18,44 +18,23 @@
     <div class="logo-div">
       <img src="../images/gptGO-logo.png" class="logo" />
     </div>
-    <div class="header">Setup</div>
+    <div class="header">Getting Started</div>
     <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
-      Welcome to GptGO! Please complete the steps below to setup your extension:
+      <div style="background-color: #00b188">Welcome to GptGO!</div>
     </div>
-    <div class="setup-steps">
-      <div style="border: solid; margin-bottom: 10px; background: #0082b1">
-        <ul style="gap: 10px">
-          <li>
-            Go to your OpenAI
-            <a
-              href="https://platform.openai.com/account/api-keys"
-              target="_blank"
-              style="color: white"
-              >account api-keys page</a
-            >
-            and log in or create an account
-          </li>
-          <li>Click on "Create new secret key"</li>
-          <li>Copy and paste the key below</li>
-          <li>
-            <div style="margin-bottom: 10px">Click submit</div>
-          </li>
-        </ul>
-      </div>
-      <div style="display: flex; margin-bottom: 10px; gap: 10px">
-        <input type="checkbox" id="checkbox" />
-        <div>
-          I have read and understand the Terms of Service
-          <span style="text-decoration: underline">AND</span> API Usage sections
-        </div>
-      </div>
-      <div class="input-group" style="padding-left: 30px">
-        <input type="password" id="apiInput" style="font-size: large" />
-        <button type="button" id="submitButton">Submit</button>
-        <div id="status"></div>
+    <div class="gif-div" style="margin-bottom: 25px">
+      <div class="how-to-steps">
+        To get started, open the popup by clicking on
+        <img
+          src="../images/61015.png"
+          style="filter: invert(1); height: 20px; width: 20px"
+        />
+        in the top right corner of Chrome and clicking GptGO from the list.
+        Then, log into you ChatGPT account. Once you have logged in, you can
+        safely close the tab and start using GptGO. If there's no log in page,
+        you're all set!
       </div>
     </div>
-    <div class="header">How to Use</div>
     <div class="sub-header" style="font-style: italic; font-size: 1.2rem">
       The quickest and easiest way to use GptGO is Quick Search:
     </div>
@@ -76,10 +55,17 @@
         </div>
         <div class="test">
           <div>Give it a try on the prompt below:</div>
-          <div>
-            <code style="background-color: #00b188; padding: 10px 20px"
-              >How are you doing today, ChatGPT?</code
-            >
+          <div
+            style="display: flex; justify-content: space-between; width: 800px"
+          >
+            <div>
+              <code style="border: solid; padding: 10px 20px"
+                >How many moons does Jupitar have?</code
+              >
+            </div>
+            <div style="font-size: 0.8rem; color: orange">
+              **If this doesn't work, see the section below
+            </div>
           </div>
         </div>
       </div>
@@ -92,10 +78,7 @@
         <div style="border: solid; margin-bottom: 10px; background: #0082b1">
           <ul style="gap: 10px">
             <li>Highlight any section of text with your cursor</li>
-            <li>
-              Click on the puzzle piece from the top right of your browser
-            </li>
-            <li>Select GptGO from the list, the popup should open</li>
+            <li>Open the GptGO popup</li>
             <li>If needed, edit your prompt</li>
             <li>Click the search button or hit ENTER</li>
           </ul>
@@ -103,8 +86,8 @@
         <div class="test">
           <div>Give it a try on the prompt below:</div>
           <div>
-            <code style="background-color: #00b188; padding: 10px 20px"
-              >Write a short essay on the benefits of AI</code
+            <code style="border: solid; padding: 10px 20px"
+              >Write a paragraph on the benefits of AI</code
             >
           </div>
         </div>
@@ -164,115 +147,6 @@
         </div>
       </div>
     </div>
-    <div class="faq">
-      <div>Why do I keep get errors when I send search requests?</div>
-      <div class="expand" id="expand3">
-        <div id="expandText3">+</div>
-      </div>
-    </div>
-    <div
-      class="gif-div"
-      style="display: none; background-color: #0082b1"
-      id="faq3"
-    >
-      <div class="how-to-steps">
-        <div style="width: 800px; border: solid; color: #fff">
-          <ul style="gap: 10px">
-            <li>
-              ChatGPT may be down, or you may have used up your free grant given
-              by OpenAI
-            </li>
-            <li>
-              To check your usage, visit your
-              <a
-                href="https://platform.openai.com/account/usage"
-                target="_blank"
-                style="color: white"
-                >account usage page</a
-              >
-            </li>
-            <li>
-              <div style="display: flex; gap: 5px; width: 650px">
-                <div>
-                  If you have used up your grant, visit the API Usage section to
-                  learn more about how and why you should switch to a "pay as
-                  you go" subscription
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="header" style="margin-top: 10px">API Usage</div>
-    <div class="gif-div">
-      <div class="how-to-steps">
-        <div style="width: 800px">
-          GptGO utilizes OpenAI's Text-Davinci-003 API, which grants all new
-          users 3 months or $18 of free API usage. After that, users will need
-          to upgrade to a "pay as you go" subscription. You can check your
-          current API usage on your
-          <a
-            href="https://platform.openai.com/account/usage"
-            target="_blank"
-            style="color: white"
-            >account usage page</a
-          >
-          <br />
-          <br />
-          <span style="font-weight: 800; color: #fff; background-color: #00b188"
-            >To clarify, GptGO will always be free</span
-          >
-          but users must pay OpenAI to continue making search requests to
-          ChatGPT after their free usage grant has expired.
-          <br />
-          <br />
-          Benefits of a "pay as you go" subscription include:
-          <div class="api-usage">
-            <ul>
-              <li>
-                <span style="text-decoration: underline">Accessibility:</span>
-                &nbsp;use ChatGPT even when the website is overloaded with
-                traffic!
-              </li>
-              <li>
-                <span style="text-decoration: underline">Convenience:</span
-                >&nbsp;never open a new tab or log in to use ChatGPT again!
-              </li>
-              <li>
-                <span style="text-decoration: underline">Affordability:</span
-                >&nbsp;only pay for what you need, most users only pay $3 to $5
-                per month!
-              </li>
-            </ul>
-          </div>
-          <br />
-          Ready to commit? Follow the steps below to switch to a paid
-          subscription:
-          <div class="api-usage">
-            <ul>
-              <li>
-                Go to your OpenAI
-                <a
-                  href="https://platform.openai.com/account/billing/overview"
-                  target="_blank"
-                  style="color: white"
-                  >account billing page</a
-                >
-                and log in
-              </li>
-              <li>
-                Click on "Set up paid account" and complete the payment form
-              </li>
-              <li>
-                Congrats! You now have a paid subscription and can use GptGO
-                forever
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="header" style="margin-top: 10px">Terms of Service</div>
     <div class="gif-div">
       <div
@@ -287,17 +161,6 @@
         do not use GptGO.
         <br />
         <br />
-        API Usage and Cost Incurrence
-        <br />
-        <ul>
-          <li>
-            For users paying for API usage, search requests from GptGO will
-            incur costs to you. These costs will be incurred by you and are not
-            included in the use of GptGO. You are solely responsible for any and
-            all charges that may be incurred as a result of your use of the API
-            through GptGO.
-          </li>
-        </ul>
         User Responsibility
         <br />
         <ul>

@@ -3,23 +3,63 @@
 import React, { useEffect, useState } from "react";
 import Main from "./Pages/Main/Main";
 import Welcome from "./Pages/Welcome/Welcome";
+import { Circles } from "react-loading-icons";
+import "./App.css";
 
 function App() {
-  const [apiKey, setApiKey] = useState();
+  const [validToken, setValidToken] = useState();
 
   const showPage = () => {
-    return apiKey ? <Main apiKey={apiKey}/> : <Welcome />;
+    return validToken ? <Main /> : <Welcome />;
   };
 
-  useEffect(() => {
-    chrome.storage.local.get(["apiKey"]).then((response) => {
-      if (response.apiKey) {
-        setApiKey(response.apiKey);
-      }
+  const getStorage = async (key) => {
+    const response = await chrome.storage.local.get([key]);
+    const value = response[key];
+    return value;
+  };
+
+  const setStorage = async (key, value) => {
+    await chrome.storage.local.set({
+      [key]: value,
     });
+  };
+
+  useEffect(async () => {
+    const loading = await getStorage("loading");
+    if (loading == null || loading === "false") {
+      try {
+        const resp = await fetch("https://chat.openai.com/api/auth/session");
+        if (resp.status === 403) {
+          setValidToken(false);
+        } else {
+          const data = await resp.json().catch(() => ({}));
+          if (data.accessToken) {
+            await setStorage("accessToken", data.accessToken);
+            setValidToken(true);
+          } else {
+            setValidToken(false);
+          }
+        }
+      } catch (err) {
+        setValidToken(false);
+      }
+    } else {
+      setValidToken(true);
+    }
   }, []);
 
-  return <div style={{ backgroundColor: "#23272f" }}>{showPage()}</div>;
+  return (
+    <div style={{ backgroundColor: "#23272f" }}>
+      {validToken == null ? (
+        <div className="loading">
+          <Circles className="circles" />
+        </div>
+      ) : (
+        showPage()
+      )}
+    </div>
+  );
 }
 
 export default App;

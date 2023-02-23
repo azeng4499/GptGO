@@ -148,7 +148,16 @@
   font-weight: bold;
 }
 
-button:hover {
+.button-disabled {
+  width: calc(100% - 40px);
+  background-color: grey;
+  color: #fff;
+  height: 30px;
+  border: none;
+  font-weight: bold;
+}
+
+.button:hover {
   background-color: #fff;
   color: #00b188;
 }
@@ -168,8 +177,8 @@ button:hover {
 }
 
 .copy {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 }
 
 .pre {
