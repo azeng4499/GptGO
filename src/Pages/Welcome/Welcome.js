@@ -31,9 +31,13 @@ const Welcome = () => {
       </button>
       <div
         className="header2-text"
-        style={{ fontSize: "0.8rem", maxWidth: "calc(100% - 140px)" }}
+        style={{
+          fontSize: "0.8rem",
+          maxWidth: "calc(100% - 140px)",
+          color: "orange",
+        }}
       >
-        Once you log in, you can safely close the tab and use GptGO
+        Once you log in, you can close the ChatGPT tab and use GptGO
       </div>
     </div>
   );

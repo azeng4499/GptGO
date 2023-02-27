@@ -13,6 +13,7 @@
     "react-loading-icons": "^1.1.0",
     "react-markdown": "^8.0.5",
     "react-scripts": "5.0.1",
+    "react-syntax-highlighter": "^15.5.0",
     "react-textarea-autosize": "^8.4.0",
     "use-clippy": "^1.0.9",
     "uuid": "^9.0.0"

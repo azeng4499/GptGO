@@ -9,6 +9,10 @@ import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
+import ReactMarkdown from "react-markdown";
+// import { useRemark } from "react-remark";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 const Main = ({ apiKey }) => {
   const [query, setQuery] = useState();
@@ -20,6 +24,8 @@ const Main = ({ apiKey }) => {
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
+  const [timestamp, setTimestamp] = useState(Date.now());
+  // const [reactContent, setMarkdownSource] = useRemark();
 
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
@@ -84,6 +90,7 @@ const Main = ({ apiKey }) => {
   const handleSearchRequest = async () => {
     setResponse(null);
     setLoading(true);
+    setTimestamp(Date.now());
     chrome.runtime.sendMessage(
       {
         query: query,
@@ -95,12 +102,14 @@ const Main = ({ apiKey }) => {
   };
 
   const handleCancelRequest = async () => {
-    chrome.runtime.sendMessage(
-      {
-        type: "abort",
-      },
-      null
-    );
+    if (Date.now() - timestamp > 1000) {
+      chrome.runtime.sendMessage(
+        {
+          type: "abort",
+        },
+        null
+      );
+    }
   };
 
   useEffect(() => {
@@ -169,7 +178,35 @@ const Main = ({ apiKey }) => {
             ) : response && !error ? (
               <div>
                 <div className="response-text">
-                  <pre className="pre">{response}</pre>
+                  <ReactMarkdown
+                    children={response}
+                    components={{
+                      code({ node, inline, className, children }) {
+                        console.log(node, inline, className);
+                        return inline ? (
+                          <code
+                            style={{
+                              fontSize: "0.7rem",
+                              color: "#fff",
+                            }}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <div className="highlight-box">
+                            <code
+                              style={{
+                                fontSize: "0.7rem",
+                                color: "#fff",
+                              }}
+                            >
+                              {children}
+                            </code>
+                          </div>
+                        );
+                      },
+                    }}
+                  />
                 </div>
               </div>
             ) : response && error ? (

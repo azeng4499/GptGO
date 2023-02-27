@@ -6,13 +6,14 @@ const faq = (num) => {
   height = style.getPropertyValue("min-height");
   height = height.substring(0, height.length - 2);
   height = parseInt(height);
+  offset = num === "1" ? 182 : 133;
 
   if (state === "+") {
-    height += 110;
+    height += offset;
     document.getElementById(faq).style.display = "flex";
     document.getElementById(expandText).innerHTML = "-";
   } else {
-    height -= 110;
+    height -= offset;
     document.getElementById(faq).style.display = "none";
     document.getElementById(expandText).innerHTML = "+";
   }
@@ -35,6 +36,8 @@ document.addEventListener("mouseup", myFunction);
 function myFunction() {
   value = window.getSelection().toString();
   if (value) {
-    chrome.storage.local.set({ query: [value, null, false] });
+    if (value != "\n") {
+      chrome.storage.local.set({ query: [value, null, false] });
+    }
   }
 }

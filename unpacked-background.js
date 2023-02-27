@@ -16,11 +16,12 @@ const errorMessages = {
 async function getResponse(accessToken, query, limit) {
   let convoID = null;
   let timeout;
+  let cleared = false;
   try {
     if (query == null || query.trim() === "") throw new Error("prompt");
 
     controller = new AbortController();
-    timeout = setTimeout(() => controller.abort("timeout"), 60000);
+    timeout = setTimeout(() => controller.abort("timeout"), 15000);
 
     const modelName = await getModelName(accessToken);
     let timestamp = Date.now();
@@ -33,7 +34,7 @@ async function getResponse(accessToken, query, limit) {
       "https://chat.openai.com/backend-api/conversation",
       {
         method: "POST",
-        signal: controller.signal,
+        signal: controller == null ? null : controller.signal,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -58,10 +59,14 @@ async function getResponse(accessToken, query, limit) {
         if (message === "[DONE]") return;
         try {
           const data = JSON.parse(message);
+          if (!cleared) {
+            clearTimeout(timeout);
+            cleared = true;
+          }
           if (convoID != data.conversation_id) convoID = data.conversation_id;
           response = data.message.content.parts[0];
           const now = Date.now();
-          if (now - timestamp > 1) {
+          if (now - timestamp > 250) {
             setStorage("query", [query, data.message.content.parts[0], false]);
             timestamp = now;
           }
@@ -70,12 +75,15 @@ async function getResponse(accessToken, query, limit) {
         }
       }
     );
-    clearTimeout(timeout);
     await clearMessage(convoID, accessToken);
     return [response, false];
   } catch (err) {
-    clearTimeout(timeout);
-    if (controller.signal.reason == "user") {
+    if (!cleared) {
+      clearTimeout(timeout);
+    }
+    if (controller == null) {
+      return [errorMessages.prompt, true];
+    } else if (controller.signal.reason == "user") {
       return [errorMessages.abort, true];
     } else if (controller.signal.reason == "timeout") {
       return [errorMessages.timeout, true];
@@ -89,8 +97,17 @@ async function getResponse(accessToken, query, limit) {
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.runtime.openOptionsPage();
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.runtime.openOptionsPage();
+  }
+  if (details.reason === "install" || details.reason === "update") {
+    var uninstallGoogleFormLink =
+      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
+    if (chrome.runtime.setUninstallURL) {
+      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
+    }
+  }
 });
 
 chrome.contextMenus.remove("3", () => {
@@ -110,7 +127,9 @@ chrome.runtime.onMessage.addListener((request, sender, callBack) => {
       callAPI(request);
       return true;
     case "abort":
-      controller.abort("user");
+      if (controller) {
+        controller.abort("user");
+      }
       break;
     default:
       break;
