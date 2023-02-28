@@ -28,8 +28,13 @@ function App() {
   useEffect(async () => {
     const loading = await getStorage("loading");
     if (loading == null || loading === "false") {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort("timeout"), 3000);
+
       try {
-        const resp = await fetch("https://chat.openai.com/api/auth/session");
+        const resp = await fetch("http://chat.openai.com/api/auth/session", {
+          signal: controller ? controller.signal : null,
+        });
         if (resp.status === 403) {
           setValidToken(false);
         } else {

@@ -10,9 +10,6 @@ import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
-// import { useRemark } from "react-remark";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 const Main = ({ apiKey }) => {
   const [query, setQuery] = useState();
@@ -25,7 +22,12 @@ const Main = ({ apiKey }) => {
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
   const [timestamp, setTimestamp] = useState(Date.now());
-  // const [reactContent, setMarkdownSource] = useRemark();
+
+  const setStorage = async (key, value) => {
+    await chrome.storage.local.set({
+      [key]: value,
+    });
+  };
 
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
@@ -39,14 +41,12 @@ const Main = ({ apiKey }) => {
     }
   }, [query]);
 
-  useEffect(() => {
-    setInfo();
+  useEffect(async () => {
+    await setInfo();
   }, []);
 
   chrome.storage.onChanged.addListener(async (changed) => {
-    if (changed.notifReady) {
-      setInfo();
-    } else if (changed.query) {
+    if (changed.query) {
       const loading = await getStorage("loading");
       if (loading === "true") {
         const query = await getStorage("query");
@@ -90,6 +90,7 @@ const Main = ({ apiKey }) => {
   const handleSearchRequest = async () => {
     setResponse(null);
     setLoading(true);
+    setEnded(false);
     setTimestamp(Date.now());
     chrome.runtime.sendMessage(
       {
@@ -103,6 +104,9 @@ const Main = ({ apiKey }) => {
 
   const handleCancelRequest = async () => {
     if (Date.now() - timestamp > 1000) {
+      await setStorage("query", [query, "User aborted search.", true]);
+      await setStorage("loading", false);
+      await setInfo();
       chrome.runtime.sendMessage(
         {
           type: "abort",
@@ -182,7 +186,6 @@ const Main = ({ apiKey }) => {
                     children={response}
                     components={{
                       code({ node, inline, className, children }) {
-                        console.log(node, inline, className);
                         return inline ? (
                           <code
                             style={{

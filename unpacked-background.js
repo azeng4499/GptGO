@@ -1,7 +1,7 @@
 import { createParser } from "eventsource-parser";
 import { v4 as uuidv4 } from "uuid";
 
-let controller;
+let controller, timeout;
 
 const errorMessages = {
   standard:
@@ -15,20 +15,21 @@ const errorMessages = {
 
 async function getResponse(accessToken, query, limit) {
   let convoID = null;
-  let timeout;
   let cleared = false;
+  let timestamp = Date.now();
+  let response;
+  const finalQuery = limit
+    ? "Limit your response to 130 characters:\n" + query
+    : query;
+
   try {
     if (query == null || query.trim() === "") throw new Error("prompt");
 
     controller = new AbortController();
+    timeout = setTimeout(() => controller.abort("timeout"), 3000);
+    const modelName = await getModelName(accessToken, controller);
+    clearTimeout(timeout);
     timeout = setTimeout(() => controller.abort("timeout"), 15000);
-
-    const modelName = await getModelName(accessToken);
-    let timestamp = Date.now();
-    let response;
-    const finalQuery = limit
-      ? "Limit your response to 130 characters:\n" + query
-      : query;
 
     await fetchSSE(
       "https://chat.openai.com/backend-api/conversation",
@@ -75,20 +76,20 @@ async function getResponse(accessToken, query, limit) {
         }
       }
     );
-    await clearMessage(convoID, accessToken);
+
+    timeout = setTimeout(() => controller.abort("timeout"), 3000);
+    await clearMessage(convoID, accessToken, controller);
+    clearTimeout(timeout);
+
     return [response, false];
   } catch (err) {
-    if (!cleared) {
-      clearTimeout(timeout);
-    }
-    if (controller == null) {
+    clearTimeout(timeout);
+    if (controller == null || err.message === "prompt") {
       return [errorMessages.prompt, true];
-    } else if (controller.signal.reason == "user") {
+    } else if (controller.signal.reason === "user") {
       return [errorMessages.abort, true];
-    } else if (controller.signal.reason == "timeout") {
+    } else if (controller.signal.reason === "timeout") {
       return [errorMessages.timeout, true];
-    } else if (err.message === "prompt") {
-      return [errorMessages.prompt, true];
     } else if (err.message === "fetch") {
       return [errorMessages.denied, true];
     } else {
@@ -97,40 +98,14 @@ async function getResponse(accessToken, query, limit) {
   }
 }
 
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === "install") {
-    chrome.runtime.openOptionsPage();
-  }
-  if (details.reason === "install" || details.reason === "update") {
-    var uninstallGoogleFormLink =
-      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
-    if (chrome.runtime.setUninstallURL) {
-      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
-    }
-  }
-});
-
-chrome.contextMenus.remove("3", () => {
-  chrome.contextMenus.create({
-    id: "3",
-    title: "Search text and get response as notification",
-    contexts: ["selection"],
-  });
-});
-
 chrome.runtime.onMessage.addListener((request, sender, callBack) => {
   switch (request.type) {
-    case "query":
-      query(request);
-      break;
     case "callAPI":
       callAPI(request);
       return true;
     case "abort":
-      if (controller) {
-        controller.abort("user");
-      }
-      break;
+      console.log("aborted");
+      if (controller) controller.abort("user");
     default:
       break;
   }
@@ -145,88 +120,98 @@ const callAPI = async (request) => {
   await setStorage("loading", "false");
 };
 
-const query = async (request) => {
-  const loading = await getStorage("loading");
-  if (loading == null || loading === "false") {
-    await setStorage("query", [request.payload, null, false]);
-  }
-};
-
 chrome.contextMenus.onClicked.addListener(async (info) => {
-  const loading = await getStorage("loading");
-  if (loading == null || loading === "false") {
-    const resp = await fetch("https://chat.openai.com/api/auth/session");
-    if (resp.status === 403) {
-      sendNotification(
-        "Error!!!",
-        "Open the GptGO popup and sign in before sending search requests"
-      );
-    } else {
-      const data = await resp.json().catch(() => ({}));
-      if (data.accessToken) {
-        await setStorage("loading", "true");
-        await setStorage("query", [info.selectionText, null, false]);
-        const response = await getResponse(
-          data.accessToken,
-          info.selectionText,
-          true
-        );
-        await setStorage("query", [
-          info.selectionText,
-          response[0],
-          response[1],
-        ]);
-        await setStorage("loading", "false");
-        sendNotification(
-          response[1] === true
-            ? "Error!!!"
-            : "Response to: " + info.selectionText,
-          response[0].replace(/\n/g, "")
-        );
-      } else {
-        sendNotification(
-          "Error!!!",
-          "Open the GptGO popup and sign in before sending search requests"
-        );
-      }
-    }
+  if (info.menuItemId === "3") {
+    await handleNotification(info);
+  } else {
+    await query(info);
   }
 });
 
 //############################## Helper Functions ###########################
 
-async function getModelName(accessToken) {
-  try {
-    const models = await fetch(`https://chat.openai.com/backend-api/models`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const modelsJson = await models.json();
-    return modelsJson.models[0].slug;
-  } catch (err) {
-    console.log(err);
-    throw new Error("model");
+const query = async (info) => {
+  const loading = await getStorage("loading");
+  if (loading == null || loading === "false") {
+    await setStorage("query", [info.selectionText, null, false]);
+  }
+};
+
+async function handleNotification(info) {
+  const loading = await getStorage("loading");
+  if (loading == null || loading === "false") {
+    const controllerNotif = new AbortController();
+    setTimeout(() => controllerNotif.abort("timeout"), 5000);
+
+    try {
+      const resp = await fetch("https://chat.openai.com/api/auth/session", {
+        signal: controllerNotif == null ? null : controllerNotif.signal,
+      });
+      if (resp.status === 403) {
+        sendNotification(
+          "Error!!!",
+          "Open the GptGO popup and sign in before sending search requests"
+        );
+      } else {
+        const data = await resp.json().catch(() => ({}));
+        if (data.accessToken) {
+          await setStorage("loading", "true");
+          await setStorage("query", [info.selectionText, null, false]);
+          const response = await getResponse(
+            data.accessToken,
+            info.selectionText,
+            true
+          );
+          await setStorage("query", [
+            info.selectionText,
+            response[0],
+            response[1],
+          ]);
+          await setStorage("loading", "false");
+          sendNotification(
+            response[1] === true
+              ? "Error!!!"
+              : "Response to: " + info.selectionText,
+            response[0].replace(/\n/g, "")
+          );
+        } else {
+          sendNotification(
+            "Error!!!",
+            "Open the GptGO popup and sign in before sending search requests"
+          );
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      sendNotification("Error!!!", "ChatGPT took too long to respond");
+    }
   }
 }
 
-async function clearMessage(convoID, accessToken) {
-  try {
-    await fetch("https://chat.openai.com/backend-api/conversation/" + convoID, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ is_visible: false }),
-    });
-    return;
-  } catch (err) {
-    console.log(err);
-    throw new Error("clear");
-  }
+async function getModelName(accessToken, controller) {
+  const models = await fetch(`https://chat.openai.com/backend-api/models`, {
+    method: "GET",
+    signal: controller == null ? null : controller.signal,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const modelsJson = await models.json();
+  return modelsJson.models[0].slug;
+}
+
+async function clearMessage(convoID, accessToken, controller) {
+  await fetch("https://chat.openai.com/backend-api/conversation/" + convoID, {
+    method: "PATCH",
+    signal: controller == null ? null : controller.signal,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ is_visible: false }),
+  });
+  return;
 }
 
 async function* streamAsyncIterable(stream) {
@@ -245,23 +230,18 @@ async function* streamAsyncIterable(stream) {
 }
 
 async function fetchSSE(resource, options, onMessage) {
-  try {
-    const resp = await fetch(resource, options);
-    if (!resp.ok) {
-      throw new Error();
-    }
-    const parser = createParser((event) => {
-      if (event.type === "event") {
-        onMessage(event.data);
-      }
-    });
-    for await (const chunk of streamAsyncIterable(resp.body)) {
-      const str = new TextDecoder().decode(chunk);
-      parser.feed(str);
-    }
-  } catch (err) {
-    console.log(err);
+  const resp = await fetch(resource, options);
+  if (!resp.ok) {
     throw new Error("fetch");
+  }
+  const parser = createParser((event) => {
+    if (event.type === "event") {
+      onMessage(event.data);
+    }
+  });
+  for await (const chunk of streamAsyncIterable(resp.body)) {
+    const str = new TextDecoder().decode(chunk);
+    parser.feed(str);
   }
 }
 
@@ -285,3 +265,35 @@ const setStorage = async (key, value) => {
     [key]: value,
   });
 };
+
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    chrome.runtime.openOptionsPage();
+  }
+  if (details.reason === "install" || details.reason === "update") {
+    var uninstallGoogleFormLink =
+      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
+    if (chrome.runtime.setUninstallURL) {
+      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
+    }
+  }
+  if (details.reason === "update") {
+    const loading = await getStorage("loading");
+    if (loading == "true") {
+      setStorage("loading", "false");
+    }
+  }
+});
+
+chrome.contextMenus.removeAll(() => {
+  chrome.contextMenus.create({
+    id: "3",
+    title: "Search + get response as notification",
+    contexts: ["selection"],
+  });
+  chrome.contextMenus.create({
+    id: "4",
+    title: "Send text to popup",
+    contexts: ["selection"],
+  });
+});
