@@ -31,35 +31,15 @@ async function getResponse(accessToken, query, limit) {
     clearTimeout(timeout);
     timeout = setTimeout(() => controller.abort("timeout"), 15000);
 
-    await fetchSSE(
-      "https://chat.openai.com/backend-api/conversation",
-      {
-        method: "POST",
-        signal: controller == null ? null : controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          action: "next",
-          messages: [
-            {
-              id: uuidv4(),
-              role: "user",
-              content: {
-                content_type: "text",
-                parts: [finalQuery],
-              },
-            },
-          ],
-          model: modelName,
-          parent_message_id: uuidv4(),
-        }),
-      },
-      (message) => {
-        if (message === "[DONE]") return;
+    await fetchMethod(
+      controller,
+      accessToken,
+      finalQuery,
+      modelName,
+      (segment) => {
+        if (segment === "[DONE]") return;
         try {
-          const data = JSON.parse(message);
+          const data = JSON.parse(segment);
           if (!cleared) {
             clearTimeout(timeout);
             cleared = true;
@@ -238,14 +218,12 @@ async function clearMessage(convoID, accessToken, controller) {
   return;
 }
 
-async function* streamAsyncIterable(stream) {
+async function* streamMethod(stream) {
   const reader = stream.getReader();
   try {
     while (true) {
       const { done, value } = await reader.read();
-      if (done) {
-        return;
-      }
+      if (done) return;
       yield value;
     }
   } finally {
@@ -253,19 +231,48 @@ async function* streamAsyncIterable(stream) {
   }
 }
 
-async function fetchSSE(resource, options, onMessage) {
-  const resp = await fetch(resource, options);
+async function fetchMethod(
+  controller,
+  accessToken,
+  finalQuery,
+  modelName,
+  callback
+) {
+  const resp = await fetch("https://chat.openai.com/backend-api/conversation", {
+    method: "POST",
+    signal: controller == null ? null : controller.signal,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      action: "next",
+      messages: [
+        {
+          id: uuidv4(),
+          role: "user",
+          content: {
+            content_type: "text",
+            parts: [finalQuery],
+          },
+        },
+      ],
+      model: modelName,
+      parent_message_id: uuidv4(),
+    }),
+  });
+
   if (!resp.ok) {
     throw new Error("fetch");
   }
   const parser = createParser((event) => {
     if (event.type === "event") {
-      onMessage(event.data);
+      callback(event.data);
     }
   });
-  for await (const chunk of streamAsyncIterable(resp.body)) {
-    const str = new TextDecoder().decode(chunk);
-    parser.feed(str);
+  for await (const segment of streamMethod(resp.body)) {
+    const decoded = new TextDecoder().decode(segment);
+    parser.feed(decoded);
   }
 }
 
