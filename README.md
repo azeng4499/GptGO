@@ -1,4 +1,4 @@
-# GptGo - ChatGPT from any tab
+# ![gptGO-logo](https://user-images.githubusercontent.com/46829528/222482564-6001cd30-7eb3-4097-a79f-8b89c1bbfe7d.png)
 
 GptGo is a chrome extension that allows you to use ChatGPT without having to switch tabs. It is built with React.js and it's been designed to be a simple and quick way to use ChatGPT. 
 
