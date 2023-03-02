@@ -24,5 +24,11 @@
     "type": "module"
   },
   "permissions": ["storage", "contextMenus", "notifications"],
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"]
+    }
+  ],
   "options_page": "options/options.html"
 }

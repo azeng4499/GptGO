@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FiHelpCircle } from "react-icons/fi";
 import "./Main.css";
-import gptGOLogo from "../../gptGO-logo.png";
-import { Circles } from "react-loading-icons";
+import Logo from "../../images/logo.png";
+import CustomLoader from "../CustomLoader/CustomLoader";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
@@ -88,22 +88,25 @@ const Main = ({ apiKey }) => {
   };
 
   const handleSearchRequest = async () => {
-    setResponse(null);
-    setLoading(true);
-    setEnded(false);
-    setTimestamp(Date.now());
-    chrome.runtime.sendMessage(
-      {
-        query: query,
-        apiKey: apiKey,
-        type: "callAPI",
-      },
-      null
-    );
+    const loading = await getStorage("loading");
+    if (loading == null || loading === "false") {
+      setResponse(null);
+      setLoading(true);
+      setEnded(false);
+      setTimestamp(Date.now());
+      chrome.runtime.sendMessage(
+        {
+          query: query,
+          apiKey: apiKey,
+          type: "callAPI",
+        },
+        null
+      );
+    }
   };
 
   const handleCancelRequest = async () => {
-    if (Date.now() - timestamp > 1000) {
+    if (Date.now() - timestamp > 500) {
       await setStorage("query", [query, "User aborted search.", true]);
       await setStorage("loading", false);
       await setInfo();
@@ -119,6 +122,7 @@ const Main = ({ apiKey }) => {
   useEffect(() => {
     const callback = (event) => {
       if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
         handleSearchRequest();
       }
     };
@@ -131,7 +135,7 @@ const Main = ({ apiKey }) => {
   return (
     <div className="main-div">
       <div className="logo-div">
-        <img src={gptGOLogo} className="logo" alt="logo" />
+        <img src={Logo} className="logo" alt="logo" />
         <FiHelpCircle
           className="settings"
           onClick={() => chrome.runtime.openOptionsPage()}
@@ -177,7 +181,7 @@ const Main = ({ apiKey }) => {
           <div className="action-div">
             {loading ? (
               <div className="circle-div">
-                <Circles className="circles" />
+                <CustomLoader />
               </div>
             ) : response && !error ? (
               <div>

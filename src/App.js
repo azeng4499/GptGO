@@ -1,10 +1,10 @@
 /* global chrome */
 
 import React, { useEffect, useState } from "react";
-import Main from "./Pages/Main/Main";
-import Welcome from "./Pages/Welcome/Welcome";
-import { Circles } from "react-loading-icons";
+import Main from "./components/Main/Main";
+import Welcome from "./components/Welcome/Welcome";
 import "./App.css";
+import CustomLoader from "./components/CustomLoader/CustomLoader";
 
 function App() {
   const [validToken, setValidToken] = useState();
@@ -58,7 +58,7 @@ function App() {
     <div style={{ backgroundColor: "#23272f" }}>
       {validToken == null ? (
         <div className="loading">
-          <Circles className="circles" />
+          <CustomLoader />
         </div>
       ) : (
         showPage()

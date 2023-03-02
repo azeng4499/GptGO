@@ -2,13 +2,13 @@
 
 import React from "react";
 import "./Welcome.css";
-import gptGOLogo from "../../gptGO-logo.png";
-import LogIn from "../../log-in.svg";
+import Logo from "../../images/logo.png";
+import LogIn from "../../images/log-in.svg";
 
 const Welcome = () => {
   return (
     <div className="main-div-welcome">
-      <img src={gptGOLogo} className="logo-welcome" alt="logo-welcome" />
+      <img src={Logo} className="logo-welcome" alt="logo-welcome" />
 
       <img
         src={LogIn}
@@ -21,14 +21,6 @@ const Welcome = () => {
       />
 
       <div className="header2-text">Please log into ChatGPT</div>
-      <button
-        className="button-welcome"
-        onClick={() => {
-          window.open("https://chat.openai.com/auth/login", "_blank");
-        }}
-      >
-        Log In
-      </button>
       <div
         className="header2-text"
         style={{
@@ -39,6 +31,14 @@ const Welcome = () => {
       >
         Once you log in, you can close the ChatGPT tab and use GptGO
       </div>
+      <button
+        className="button-welcome"
+        onClick={() => {
+          window.open("https://chat.openai.com/auth/login", "_blank");
+        }}
+      >
+        Log In
+      </button>
     </div>
   );
 };

@@ -98,46 +98,52 @@ async function getResponse(accessToken, query, limit) {
   }
 }
 
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    chrome.runtime.openOptionsPage();
+  }
+  if (details.reason === "install" || details.reason === "update") {
+    var uninstallGoogleFormLink =
+      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
+    if (chrome.runtime.setUninstallURL) {
+      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
+    }
+  }
+  if (details.reason === "update") {
+    const loading = await getStorage("loading");
+    if (loading == "true") {
+      setStorage("loading", "false");
+    }
+  }
+});
+
+chrome.contextMenus.removeAll(() => {
+  chrome.contextMenus.create({
+    id: "3",
+    title: "Search + get response as notification",
+    contexts: ["selection"],
+  });
+});
+
 chrome.runtime.onMessage.addListener((request, sender, callBack) => {
   switch (request.type) {
+    case "query":
+      query(request);
+      break;
     case "callAPI":
       callAPI(request);
-      return true;
+      break;
     case "abort":
-      console.log("aborted");
-      if (controller) controller.abort("user");
+      if (controller) {
+        controller.abort("user");
+      }
+      break;
     default:
       break;
   }
 });
 
-const callAPI = async (request) => {
-  await setStorage("loading", "true");
-  await setStorage("query", [request.query, null, false]);
-  const accessToken = await getStorage("accessToken");
-  const response = await getResponse(accessToken, request.query, false);
-  await setStorage("query", [request.query, response[0], response[1]]);
-  await setStorage("loading", "false");
-};
-
 chrome.contextMenus.onClicked.addListener(async (info) => {
-  if (info.menuItemId === "3") {
-    await handleNotification(info);
-  } else {
-    await query(info);
-  }
-});
-
-//############################## Helper Functions ###########################
-
-const query = async (info) => {
-  const loading = await getStorage("loading");
-  if (loading == null || loading === "false") {
-    await setStorage("query", [info.selectionText, null, false]);
-  }
-};
-
-async function handleNotification(info) {
   const loading = await getStorage("loading");
   if (loading == null || loading === "false") {
     const controllerNotif = new AbortController();
@@ -183,10 +189,28 @@ async function handleNotification(info) {
       }
     } catch (err) {
       console.log(err);
-      sendNotification("Error!!!", "ChatGPT took too long to respond");
+      sendNotification("Error!!!", "There was a problem connecting to ChatGPT");
     }
   }
-}
+});
+
+//############################## Helper Functions ###########################
+
+const callAPI = async (request) => {
+  await setStorage("loading", "true");
+  await setStorage("query", [request.query, null, false]);
+  const accessToken = await getStorage("accessToken");
+  const response = await getResponse(accessToken, request.query, false);
+  await setStorage("query", [request.query, response[0], response[1]]);
+  await setStorage("loading", "false");
+};
+
+const query = async (request) => {
+  const loading = await getStorage("loading");
+  if (loading == null || loading === "false") {
+    await setStorage("query", [request.payload, null, false]);
+  }
+};
 
 async function getModelName(accessToken, controller) {
   const models = await fetch(`https://chat.openai.com/backend-api/models`, {
@@ -265,35 +289,3 @@ const setStorage = async (key, value) => {
     [key]: value,
   });
 };
-
-chrome.runtime.onInstalled.addListener(async (details) => {
-  if (details.reason === "install") {
-    chrome.runtime.openOptionsPage();
-  }
-  if (details.reason === "install" || details.reason === "update") {
-    var uninstallGoogleFormLink =
-      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
-    if (chrome.runtime.setUninstallURL) {
-      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
-    }
-  }
-  if (details.reason === "update") {
-    const loading = await getStorage("loading");
-    if (loading == "true") {
-      setStorage("loading", "false");
-    }
-  }
-});
-
-chrome.contextMenus.removeAll(() => {
-  chrome.contextMenus.create({
-    id: "3",
-    title: "Search + get response as notification",
-    contexts: ["selection"],
-  });
-  chrome.contextMenus.create({
-    id: "4",
-    title: "Send text to popup",
-    contexts: ["selection"],
-  });
-});
