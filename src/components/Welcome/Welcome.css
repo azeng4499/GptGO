@@ -18,7 +18,7 @@
   height: 50px;
   object-fit: contain;
   margin-top: 20px;
-  margin-bottom: 100px;
+  margin-bottom: 50px;
 }
 
 .header1-text {
@@ -30,23 +30,21 @@
 
 .header2-text {
   font-family: "Prompt", sans-serif;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #fff;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
   text-align: center;
   padding-left: 30px;
   padding-right: 30px;
-}
-
-.header2-wrapper {
-  width: 100%;
+  font-weight: 800;
 }
 
 .button-welcome {
-  width: calc(100% - 100px);
+  width: calc(100% - 140px);
   background-color: #00b188;
   color: #fff;
   height: 30px;
   border: none;
   font-weight: bold;
+  margin-bottom: 40px;
 }

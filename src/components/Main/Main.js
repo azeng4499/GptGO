@@ -3,22 +3,25 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FiHelpCircle } from "react-icons/fi";
 import "./Main.css";
-import gptGOLogo from "../../gptGO-logo.png";
-import { Circles } from "react-loading-icons";
+import Logo from "../../images/logo.png";
+import CustomLoader from "../CustomLoader/CustomLoader";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
+import ReactMarkdown from "react-markdown";
 
 const Main = ({ apiKey }) => {
   const [query, setQuery] = useState();
   const [response, setResponse] = useState();
   const [loading, setLoading] = useState(false);
+  const [ended, setEnded] = useState(true);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
+  const [timestamp, setTimestamp] = useState(Date.now());
 
   const setStorage = async (key, value) => {
     await chrome.storage.local.set({
@@ -38,13 +41,29 @@ const Main = ({ apiKey }) => {
     }
   }, [query]);
 
-  useEffect(() => {
-    setInfo();
+  useEffect(async () => {
+    await setInfo();
   }, []);
 
-  chrome.storage.onChanged.addListener((changed) => {
-    if (changed.notifReady) {
-      setInfo();
+  chrome.storage.onChanged.addListener(async (changed) => {
+    if (changed.query) {
+      const loading = await getStorage("loading");
+      if (loading === "true") {
+        const query = await getStorage("query");
+        const response = query[1];
+        const error = query[2];
+        if (response != null) {
+          setLoading(false);
+          setError(error);
+          setResponse(response);
+        }
+      }
+    } else if (changed.loading) {
+      if (changed.loading.newValue === "false") {
+        setEnded(true);
+      } else {
+        setEnded(false);
+      }
     }
   });
 
@@ -56,8 +75,10 @@ const Main = ({ apiKey }) => {
       setQuery(query[0]);
       if (loading != null && loading === "true") {
         setLoading(true);
+        setEnded(false);
       } else {
         setLoading(false);
+        setEnded(true);
       }
       if (query[1] != null) {
         setResponse(query[1]);
@@ -67,40 +88,41 @@ const Main = ({ apiKey }) => {
   };
 
   const handleSearchRequest = async () => {
-    setLoading(true);
-    chrome.runtime.sendMessage(
-      {
-        query: query,
-        apiKey: apiKey,
-        type: "callAPI",
-      },
-      (response) => {
-        setQuery(response[0]);
-        setResponse(response[1]);
-        setError(response[2]);
-        setLoading(false);
-      }
-    );
+    const loading = await getStorage("loading");
+    if (loading == null || loading === "false") {
+      setResponse(null);
+      setLoading(true);
+      setEnded(false);
+      setTimestamp(Date.now());
+      chrome.runtime.sendMessage(
+        {
+          query: query,
+          apiKey: apiKey,
+          type: "callAPI",
+        },
+        null
+      );
+    }
   };
 
   const handleCancelRequest = async () => {
-    chrome.runtime.sendMessage(
-      {
-        type: "abort",
-      },
-      null
-    );
-    await setStorage("loading", false);
-
-    //Not sure why this is neccessary but it's a failsafe
-    setResponse("User aborted search.");
-    setError(true);
-    setLoading(false);
+    if (Date.now() - timestamp > 500) {
+      await setStorage("query", [query, "User aborted search.", true]);
+      await setStorage("loading", false);
+      await setInfo();
+      chrome.runtime.sendMessage(
+        {
+          type: "abort",
+        },
+        null
+      );
+    }
   };
 
   useEffect(() => {
     const callback = (event) => {
-      if (event.key == "Enter" && !event.shiftKey) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
         handleSearchRequest();
       }
     };
@@ -113,7 +135,7 @@ const Main = ({ apiKey }) => {
   return (
     <div className="main-div">
       <div className="logo-div">
-        <img src={gptGOLogo} className="logo" alt="logo" />
+        <img src={Logo} className="logo" alt="logo" />
         <FiHelpCircle
           className="settings"
           onClick={() => chrome.runtime.openOptionsPage()}
@@ -144,9 +166,9 @@ const Main = ({ apiKey }) => {
         <div className="answer-div">
           <div className="response-label">
             Response:
-            {!loading && copied && !error ? (
+            {ended && copied && !error ? (
               <AiFillCheckCircle className="copy" />
-            ) : !loading && !copied && !error ? (
+            ) : ended && !copied && !error ? (
               <RxCopy
                 className="copy"
                 onClick={() => {
@@ -159,18 +181,39 @@ const Main = ({ apiKey }) => {
           <div className="action-div">
             {loading ? (
               <div className="circle-div">
-                <Circles className="circles" />
-                <div
-                  className="cancel-button"
-                  onClick={() => handleCancelRequest()}
-                >
-                  Cancel
-                </div>
+                <CustomLoader />
               </div>
             ) : response && !error ? (
               <div>
                 <div className="response-text">
-                  <pre className="pre">{response}</pre>
+                  <ReactMarkdown
+                    children={response}
+                    components={{
+                      code({ node, inline, className, children }) {
+                        return inline ? (
+                          <code
+                            style={{
+                              fontSize: "0.7rem",
+                              color: "#fff",
+                            }}
+                          >
+                            {children}
+                          </code>
+                        ) : (
+                          <div className="highlight-box">
+                            <code
+                              style={{
+                                fontSize: "0.7rem",
+                                color: "#fff",
+                              }}
+                            >
+                              {children}
+                            </code>
+                          </div>
+                        );
+                      },
+                    }}
+                  />
                 </div>
               </div>
             ) : response && error ? (
@@ -180,14 +223,21 @@ const Main = ({ apiKey }) => {
         </div>
       </div>
       <div className="button-div">
-        {!loading && (
+        {ended ? (
           <button
             className="button"
             type="button"
             onClick={() => handleSearchRequest()}
-            disabled={loading}
           >
             Search
+          </button>
+        ) : (
+          <button
+            className="button-disabled"
+            type="button"
+            onClick={() => handleCancelRequest()}
+          >
+            Cancel
           </button>
         )}
       </div>
