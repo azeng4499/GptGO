@@ -6,3 +6,9 @@
   justify-content: center;
   align-items: center;
 }
+
+.label {
+  color: #fff;
+  font-family: "Prompt", sans-serif;
+  font-size: 1rem;
+}

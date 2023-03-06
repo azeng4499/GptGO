@@ -5,7 +5,7 @@ import "./Welcome.css";
 import Logo from "../../images/logo.png";
 import LogIn from "../../images/log-in.svg";
 
-const Welcome = () => {
+const Welcome = ({ setClickedMan }) => {
   return (
     <div className="main-div-welcome">
       <img src={Logo} className="logo-welcome" alt="logo-welcome" />
@@ -39,6 +39,20 @@ const Welcome = () => {
       >
         Log In
       </button>
+      <div
+        style={{
+          color: "white",
+          fontSize: "0.5rem",
+          cursor: "pointer",
+          paddingBottom: "3px",
+          borderBottom: "solid",
+        }}
+        onClick={() => {
+          setClickedMan(true);
+        }}
+      >
+        Manually Enter Access Key
+      </div>
     </div>
   );
 };

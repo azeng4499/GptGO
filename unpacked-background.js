@@ -8,7 +8,7 @@ const errorMessages = {
     "A network or API error occurred! Please wait a minute and try again.",
   prompt: "Invalid prompt.",
   denied:
-    "ChatGPT denied this request. Please wait a minute before sending another request.",
+    "ChatGPT says you are sending too many requests. Please slow down before sending another request.",
   abort: "User aborted search.",
   timeout: "ChatGPT isn't responding right now. Please try again later.",
 };
@@ -63,6 +63,7 @@ async function getResponse(accessToken, query, limit) {
 
     return [response, false];
   } catch (err) {
+    console.log(err);
     clearTimeout(timeout);
     if (controller == null || err.message === "prompt") {
       return [errorMessages.prompt, true];

@@ -2,7 +2,7 @@ document.addEventListener("mouseup", myFunction);
 
 function myFunction() {
   value = window.getSelection().toString();
-  if (value) {
+  if (value && value.trim() != "\n" && value.trim() != "") {
     chrome.runtime.sendMessage(
       {
         payload: value,
