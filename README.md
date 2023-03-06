@@ -1,5 +1,7 @@
 # ![gptGO-logo](https://user-images.githubusercontent.com/46829528/222482564-6001cd30-7eb3-4097-a79f-8b89c1bbfe7d.png)
 
+![License](https://img.shields.io/github/license/azeng4499/GptGO)
+
 GptGo is a chrome extension that allows you to use ChatGPT without having to switch tabs. It is built with React.js and it's been designed to be a simple and quick way to use ChatGPT. 
 
 [Link to Install on Chrome Web Store](https://chrome.google.com/webstore/detail/gptgo-chatgpt-from-any-ta/oeekolihnpojdigebjbhnkhbepjdoidi)
