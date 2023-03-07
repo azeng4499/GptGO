@@ -6,11 +6,12 @@ let controller, timeout;
 const errorMessages = {
   standard:
     "A network or API error occurred! Please wait a minute and try again.",
+  network: "Your network is down.",
   prompt: "Invalid prompt.",
   denied:
     "ChatGPT says you are sending too many requests in a row. Please slow down before sending another request.",
   abort: "User aborted search.",
-  timeout: "ChatGPT timeout. Please try again later.",
+  timeout: "Timeout error. This most likely means either your network or ChatGPT is too slow.",
 };
 
 async function getResponse(accessToken, query, limit) {
@@ -60,7 +61,6 @@ async function getResponse(accessToken, query, limit) {
     timeout = setTimeout(() => controller.abort("timeout"), 3000);
     await clearMessage(convoID, accessToken, controller);
     clearTimeout(timeout);
-
     return [response, false];
   } catch (err) {
     console.log(err);
@@ -73,6 +73,8 @@ async function getResponse(accessToken, query, limit) {
       return [errorMessages.timeout, true];
     } else if (err.message === "fetch") {
       return [errorMessages.denied, true];
+    } else if (err.name === "NetworkError") {
+      return [errorMessages.network, true];
     } else {
       return [errorMessages.standard, true];
     }
@@ -124,6 +126,21 @@ chrome.runtime.onMessage.addListener((request, sender, callBack) => {
   }
 });
 
+const getOtherId = async () => {
+  const accessArr = await getStorage("accessArr");
+  if (accessArr != null) {
+    const expireDate = new Date(accessArr[1]);
+    const now = new Date();
+    if (now < expireDate) {
+      return [true, accessArr[0]];
+    } else {
+      return [false, null];
+    }
+  } else {
+    return [false, null];
+  }
+};
+
 chrome.contextMenus.onClicked.addListener(async (info) => {
   const loading = await getStorage("loading");
   if (loading == null || loading === "false") {
@@ -134,21 +151,32 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
       const resp = await fetch("https://chat.openai.com/api/auth/session", {
         signal: controllerNotif == null ? null : controllerNotif.signal,
       });
-      if (resp.status === 403) {
+
+      const otherId = await getOtherId();
+
+      if (resp.status === 403 && otherId[0] === false) {
         sendNotification(
           "Error!!!",
           "Open the GptGO popup and sign in before sending search requests"
         );
       } else {
-        const data = await resp.json().catch(() => ({}));
-        if (data.accessToken) {
+        let token = null;
+
+        try {
+          const data = await resp.json().catch(() => ({}));
+          if (data.accessToken) {
+            token = data.accessToken;
+          } else {
+            token = otherId[1];
+          }
+        } catch (err) {
+          token = otherId[1];
+        }
+
+        if (token != null) {
           await setStorage("loading", "true");
           await setStorage("query", [info.selectionText, null, false]);
-          const response = await getResponse(
-            data.accessToken,
-            info.selectionText,
-            true
-          );
+          const response = await getResponse(token, info.selectionText, true);
           await setStorage("query", [
             info.selectionText,
             response[0],

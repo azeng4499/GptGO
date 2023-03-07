@@ -43,6 +43,7 @@ function App() {
         const resp = await fetch("http://chat.openai.com/api/auth/session", {
           signal: controller ? controller.signal : null,
         });
+
         if (resp.status === 403) {
           const accessArr = await getStorage("accessArr");
           if (accessArr != null) {
