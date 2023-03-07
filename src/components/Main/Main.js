@@ -11,11 +11,15 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
 
-const Main = ({ apiKey }) => {
+const Main = () => {
   const [query, setQuery] = useState();
   const [response, setResponse] = useState();
   const [loading, setLoading] = useState(false);
   const [ended, setEnded] = useState(true);
+
+  const [search, setSearch] = useState(false);
+  const [abort, setAbort] = useState(false);
+
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
@@ -23,11 +27,9 @@ const Main = ({ apiKey }) => {
   const [clipboard, setClipboard] = useClippy();
   const [timestamp, setTimestamp] = useState(Date.now());
 
-  const setStorage = async (key, value) => {
-    await chrome.storage.local.set({
-      [key]: value,
-    });
-  };
+  useEffect(() => {
+    setEnded(!search && !abort);
+  }, [search, abort]);
 
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
@@ -60,9 +62,9 @@ const Main = ({ apiKey }) => {
       }
     } else if (changed.loading) {
       if (changed.loading.newValue === "false") {
-        setEnded(true);
-      } else {
-        setEnded(false);
+        setSearch(false);
+      } else if (changed.loading.newValue === "true") {
+        setSearch(true);
       }
     }
   });
@@ -76,6 +78,7 @@ const Main = ({ apiKey }) => {
       if (loading != null && loading === "true") {
         setLoading(true);
         setEnded(false);
+        setSearch(true);
       } else {
         setLoading(false);
         setEnded(true);
@@ -90,31 +93,62 @@ const Main = ({ apiKey }) => {
   const handleSearchRequest = async () => {
     const loading = await getStorage("loading");
     if (loading == null || loading === "false") {
+      setSearch(true);
       setResponse(null);
       setLoading(true);
-      setEnded(false);
       setTimestamp(Date.now());
       chrome.runtime.sendMessage(
         {
           query: query,
-          apiKey: apiKey,
           type: "callAPI",
         },
-        null
+        () => {
+          setSearch(false);
+        }
       );
     }
   };
 
   const handleCancelRequest = async () => {
-    if (Date.now() - timestamp > 500) {
-      await setStorage("query", [query, "User aborted search.", true]);
-      await setStorage("loading", false);
-      await setInfo();
+    if (Date.now() - timestamp > 250) {
+      setAbort(true);
       chrome.runtime.sendMessage(
         {
           type: "abort",
         },
-        null
+        () => {
+          setAbort(false);
+        }
+      );
+    }
+  };
+
+  const returnButton = () => {
+    if (ended) {
+      return (
+        <button
+          className="button"
+          type="button"
+          onClick={() => handleSearchRequest()}
+        >
+          Search
+        </button>
+      );
+    } else if (search && !abort) {
+      return (
+        <button
+          className="button-disabled"
+          type="button"
+          onClick={() => handleCancelRequest()}
+        >
+          Cancel
+        </button>
+      );
+    } else if (abort) {
+      return (
+        <button className="button-disabled" type="button" disabled={true}>
+          Aborting
+        </button>
       );
     }
   };
@@ -222,25 +256,7 @@ const Main = ({ apiKey }) => {
           </div>
         </div>
       </div>
-      <div className="button-div">
-        {ended ? (
-          <button
-            className="button"
-            type="button"
-            onClick={() => handleSearchRequest()}
-          >
-            Search
-          </button>
-        ) : (
-          <button
-            className="button-disabled"
-            type="button"
-            onClick={() => handleCancelRequest()}
-          >
-            Cancel
-          </button>
-        )}
-      </div>
+      <div className="button-div">{returnButton()}</div>
     </div>
   );
 };

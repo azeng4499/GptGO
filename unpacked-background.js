@@ -8,9 +8,9 @@ const errorMessages = {
     "A network or API error occurred! Please wait a minute and try again.",
   prompt: "Invalid prompt.",
   denied:
-    "ChatGPT says you are sending too many requests. Please slow down before sending another request.",
+    "ChatGPT says you are sending too many requests in a row. Please slow down before sending another request.",
   abort: "User aborted search.",
-  timeout: "ChatGPT isn't responding right now. Please try again later.",
+  timeout: "ChatGPT timeout. Please try again later.",
 };
 
 async function getResponse(accessToken, query, limit) {
@@ -110,17 +110,17 @@ chrome.runtime.onMessage.addListener((request, sender, callBack) => {
   switch (request.type) {
     case "query":
       query(request);
-      break;
+      return true;
     case "callAPI":
-      callAPI(request);
-      break;
+      callAPI(request).then(() => {
+        callBack();
+      });
+      return true;
     case "abort":
-      if (controller) {
-        controller.abort("user");
-      }
-      break;
-    default:
-      break;
+      abort().then(() => {
+        callBack();
+      });
+      return true;
   }
 });
 
@@ -191,6 +191,10 @@ const query = async (request) => {
   if (loading == null || loading === "false") {
     await setStorage("query", [request.payload, null, false]);
   }
+};
+
+const abort = async () => {
+  controller.abort("user");
 };
 
 async function getModelName(accessToken, controller) {
