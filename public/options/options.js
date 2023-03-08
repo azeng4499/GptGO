@@ -27,6 +27,7 @@ const load = async () => {
   if (value === true) {
     document.getElementById("main-content").style.display = "flex";
     document.getElementById("agree-button").style.display = "none";
+    document.getElementById("welcome-header").style.display = "none";
   }
 };
 
@@ -43,6 +44,7 @@ const load = async () => {
       .addEventListener("click", async () => {
         document.getElementById("main-content").style.display = "flex";
         document.getElementById("agree-button").style.display = "none";
+        document.getElementById("welcome-header").style.display = "none";
         await chrome.storage.local.set({
           ["agreed"]: true,
         });
