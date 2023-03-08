@@ -17,15 +17,37 @@ const Manual = ({ setValidToken }) => {
     <div className="manual">
       <div className="header-div">
         <div className="header">Manually Enter Access Key</div>
-        <div className="sub-header">
-          After you have logged into ChatGPT, copy the ENTIRE text at{" "}
+        <div className="sub-header" style={{ width: "300px" }}>
+          <ul>
+            <li style={{ textAlign: "start" }}>
+              If you haven't done so already, log into ChatGPT{" "}
+              <a
+                style={{ color: "#fff" }}
+                href="https://chat.openai.com/auth/login"
+                target="_blank"
+              >
+                here
+              </a>
+            </li>
+            <li style={{ textAlign: "start" }}>
+              Copy the ENTIRE text at{" "}
+              <a
+                style={{ color: "#fff" }}
+                href="http://chat.openai.com/api/auth/session"
+                target="_blank"
+              >
+                this link
+              </a>
+            </li>
+          </ul>
+          {/* After you have logged into ChatGPT, copy the ENTIRE text at{" "}
           <a
             style={{ color: "#fff" }}
             href="http://chat.openai.com/api/auth/session"
             target="_blank"
           >
             this link
-          </a>
+          </a> */}
         </div>
       </div>
       <textarea

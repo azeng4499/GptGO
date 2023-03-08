@@ -11,6 +11,14 @@
   min-width: 850px;
 }
 
+#main-content {
+  display: none;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .input-group {
   display: flex;
   height: 30px;
@@ -142,4 +150,12 @@ html {
   margin-top: 5px;
   border: solid;
   color: #fff;
+}
+
+#agree-button {
+  background-color: #0082b1;
+  color: white;
+  font-size: 1.2rem;
+  border: solid white 1px;
+  margin-top: 30px;
 }

@@ -41,17 +41,26 @@ const Welcome = ({ setClickedMan }) => {
       </button>
       <div
         style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           color: "white",
-          fontSize: "0.5rem",
-          cursor: "pointer",
-          paddingBottom: "3px",
-          borderBottom: "solid",
-        }}
-        onClick={() => {
-          setClickedMan(true);
+          fontSize: "0.6rem",
+          gap: "5px",
         }}
       >
-        Manually Enter Access Key
+        <div>Log in didn't work?</div>
+        <div
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={() => {
+            setClickedMan(true);
+          }}
+        >
+          Manually Enter Access Key
+        </div>
       </div>
     </div>
   );
