@@ -68,6 +68,7 @@ function App() {
           }
         }
       } catch (err) {
+        console.log(err);
         setNoWifi(true);
         setValidToken(false);
       }

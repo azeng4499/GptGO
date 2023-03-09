@@ -45,15 +45,18 @@ const Welcome = ({ setClickedMan }) => {
           justifyContent: "center",
           alignItems: "center",
           color: "white",
-          fontSize: "0.6rem",
+          fontSize: "0.5rem",
           gap: "5px",
+          flexDirection: "column",
+          marginBottom: "10px",
         }}
       >
-        <div>Log in didn't work?</div>
+        <div>Log in didn't work or keep getting signed out?</div>
         <div
           style={{
             cursor: "pointer",
             textDecoration: "underline",
+            fontSize: "0.6rem",
           }}
           onClick={() => {
             setClickedMan(true);

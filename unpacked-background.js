@@ -11,7 +11,8 @@ const errorMessages = {
   denied:
     "ChatGPT says you are sending too many requests in a row. Please slow down before sending another request.",
   abort: "User aborted search.",
-  timeout: "Timeout error. This most likely means either your network or ChatGPT is too slow.",
+  timeout:
+    "Timeout error. This most likely means either your network or ChatGPT is too slow.",
 };
 
 async function getResponse(accessToken, query, limit) {

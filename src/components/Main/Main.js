@@ -31,6 +31,12 @@ const Main = () => {
     setEnded(!search && !abort);
   }, [search, abort]);
 
+  const setStorage = async (key, value) => {
+    await chrome.storage.local.set({
+      [key]: value,
+    });
+  };
+
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
     const value = response[key];
@@ -73,7 +79,7 @@ const Main = () => {
     const query = await getStorage("query");
     const loading = await getStorage("loading");
 
-    if (query != null) {
+    if (query != null && query[0].trim() != "") {
       setQuery(query[0]);
       if (loading != null && loading === "true") {
         setLoading(true);
@@ -188,10 +194,17 @@ const Main = () => {
               : "Please highlight a section of text or start typing in this box."
           }
           disabled={loading}
-          onChange={(e) => {
+          onChange={async (e) => {
             if (response) {
               setResponse(null);
             }
+
+            const now = Date.now();
+            if (now - timestamp > 100) {
+              await setStorage("query", [e.target.value, null, false]);
+              setTimestamp(now);
+            }
+
             setQuery(e.target.value);
           }}
         />
