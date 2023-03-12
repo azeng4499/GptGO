@@ -33,6 +33,9 @@ function App() {
     });
   };
 
+  //hey
+
+  
   useEffect(async () => {
     const loading = await getStorage("loading");
     if (loading == null || loading === "false") {
