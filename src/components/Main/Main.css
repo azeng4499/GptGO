@@ -203,6 +203,20 @@
   border-radius: 5px;
 }
 
+.error-box {
+  background-color: #23272f;
+  max-width: 100%;
+  padding: 10px 5px;
+  border-radius: 5px;
+  text-align: center;
+  border: solid red 1px;
+}
+
 .highlight-box::-webkit-scrollbar {
   display: none;
+}
+
+.code-style {
+  font-size: 0.7rem;
+  color: #fff;
 }

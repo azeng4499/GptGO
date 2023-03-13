@@ -1,5 +1,6 @@
 import { createParser } from "eventsource-parser";
 import { v4 as uuidv4 } from "uuid";
+import { Configuration, OpenAIApi } from "openai";
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === "install") {
@@ -35,7 +36,7 @@ chrome.runtime.onMessage.addListener((request) => {
 const query = async (request) => {
   const lock = await getStorage("lock");
   if (lock === false) {
-    await setStorage("query", [request.payload, null, false]);
+    await setStorage("query", [request.payload, null]);
   }
 };
 
@@ -56,7 +57,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
       if (resp.status === 403) {
         const apiKey = await getStorage("apiKey");
         if (apiKey != null) {
-          response = await getResponseNotfi(info, apiKey);
+          response = await getResponseNotfi(info, apiKey, "api");
         } else {
           sendNotification(
             "Error!!!",
@@ -66,7 +67,8 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
       } else {
         const data = await resp.json().catch(() => ({}));
         if (data.accessToken) {
-          response = await getResponseNotfi(info, data.accessToken);
+          await setStorage("accessToken", data.accessToken);
+          response = await getResponseNotfi(info, data.accessToken, "access");
         } else {
           sendNotification(
             "Error!!!",
@@ -83,6 +85,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
         response[0],
         response[1],
       ]);
+
       setStorage("lock", false);
     }
   }
@@ -90,36 +93,31 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
 
 //############################## Helper Functions ###########################
 
-const getResponseNotfi = async (info, token) => {
-  await setStorage("query", [info.selectionText, null, false]);
-  const response = await getResponse(token, info.selectionText);
-  await setStorage("query", [info.selectionText, response[0], response[1]]);
+const getResponseNotfi = async (info, token, type) => {
+  await setStorage("query", [info.selectionText, null]);
+
+  let response;
+
+  if (type === "access") {
+    response = await getResponse(token, info.selectionText);
+  } else {
+    response = await getResponseAPI(token, info.selectionText);
+  }
+
+  if (response[1] === true) {
+    await setStorage("query", [
+      info.selectionText,
+      "\n\n```error\n🛑 A network or API error occurred! 🛑\n``",
+    ]);
+  } else {
+    await setStorage("query", [info.selectionText, response[0]]);
+  }
+
   sendNotification(
     response[1] === true ? "Error!!!" : "Response to: " + info.selectionText,
     response[0].replace(/\n/g, "")
   );
   return response;
-};
-
-const sendNotification = (query, response) => {
-  chrome.notifications.create("", {
-    title: query,
-    type: "basic",
-    message: response,
-    iconUrl: "images/logo192.png",
-  });
-};
-
-const getStorage = async (key) => {
-  const response = await chrome.storage.local.get([key]);
-  const value = response[key];
-  return value;
-};
-
-const setStorage = async (key, value) => {
-  await chrome.storage.local.set({
-    [key]: value,
-  });
 };
 
 async function getResponse(accessToken, query) {
@@ -168,12 +166,30 @@ async function getResponse(accessToken, query) {
     console.log(err);
     clearTimeout(timeout);
 
-    return [
-      "A network or API error occurred! Please wait a minute and try again.",
-      true,
-    ];
+    return ["A network or API error occurred!", true];
   }
 }
+
+const getResponseAPI = async (token, query) => {
+  try {
+    const configuration = new Configuration({
+      apiKey: token,
+    });
+    const openai = new OpenAIApi(configuration);
+
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: query }],
+    });
+
+    return [completion.data.choices[0].message, false];
+  } catch (err) {
+    console.log(err);
+    return ["A network or API error occurred!", true];
+  }
+};
+
+//############################# Helper Functions #############################
 
 async function getModelName(accessToken, controller) {
   const models = await fetch(`https://chat.openai.com/backend-api/models`, {
@@ -258,3 +274,24 @@ async function fetchMethod(
     parser.feed(decoded);
   }
 }
+
+const sendNotification = (query, response) => {
+  chrome.notifications.create("", {
+    title: query,
+    type: "basic",
+    message: response,
+    iconUrl: "images/logo192.png",
+  });
+};
+
+const getStorage = async (key) => {
+  const response = await chrome.storage.local.get([key]);
+  const value = response[key];
+  return value;
+};
+
+const setStorage = async (key, value) => {
+  await chrome.storage.local.set({
+    [key]: value,
+  });
+};

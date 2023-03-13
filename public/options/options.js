@@ -39,6 +39,36 @@ const load = async () => {
     document.getElementById("expand2").addEventListener("click", () => {
       faq("2");
     });
+
+    document
+      .getElementById("api-enter")
+      .addEventListener("click", async (event) => {
+        const apiKey = document.getElementById("api-input").value;
+        await chrome.storage.local.set({
+          apiKey: apiKey,
+        });
+        console.log("oka");
+      });
+    document.getElementById("api-expand").addEventListener("click", () => {
+      const state = document.getElementById("api-expand-text").innerHTML;
+      style = window.getComputedStyle(document.getElementById("main"));
+      height = style.getPropertyValue("min-height");
+      height = height.substring(0, height.length - 2);
+      height = parseInt(height);
+      offset = 225;
+
+      if (state === "+") {
+        height += offset;
+        document.getElementById("api").style.display = "flex";
+        document.getElementById("api-expand-text").innerHTML = "-";
+      } else {
+        height -= offset;
+        document.getElementById("api").style.display = "none";
+        document.getElementById("api-expand-text").innerHTML = "+";
+      }
+      document.getElementById("main").style.minHeight =
+        height.toString() + "px";
+    });
     document
       .getElementById("agree-button")
       .addEventListener("click", async () => {

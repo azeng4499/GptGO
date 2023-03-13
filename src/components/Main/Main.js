@@ -7,23 +7,28 @@ import Logo from "../../images/logo.png";
 import CustomLoader from "../CustomLoader/CustomLoader";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
-import { AiFillCheckCircle } from "react-icons/ai";
+import { AiFillCheckCircle, AiOutlineHistory } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
 import { callAPI } from "../Utils/Api";
+import { RiChatNewLine } from "react-icons/ri";
+import { toBeEmpty } from "@testing-library/jest-dom/dist/matchers";
 
 const Main = ({ token }) => {
   const [query, setQuery] = useState(null);
   const [response, setResponse] = useState(null);
   const [showLoader, setShowLoader] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
   const [timestamp, setTimestamp] = useState(Date.now());
   const [controller, setController] = useState(null);
+  const [convoInfo, setConvoInfo] = useState({
+    convoId: null,
+    parentMessageId: null,
+  });
 
   const setStorage = async (key, value) => {
     await chrome.storage.local.set({
@@ -51,7 +56,6 @@ const Main = ({ token }) => {
     if (changed.notfiReady) {
       setQuery(changed.notfiReady.newValue[0]);
       setResponse(changed.notfiReady.newValue[1]);
-      setError(changed.notfiReady.newValue[2]);
     } else if (changed.lock) {
       if (changed.lock.newValue === true) {
         setShowLoader(true);
@@ -66,6 +70,7 @@ const Main = ({ token }) => {
   const setInfo = async () => {
     const query = await getStorage("query");
     const lock = await getStorage("lock");
+    const savedConvoInfo = await getStorage("convoInfo");
 
     if (query != null && query[0].trim() != "") {
       setQuery(query[0]);
@@ -78,8 +83,14 @@ const Main = ({ token }) => {
       }
       if (query[1] != null) {
         setResponse(query[1]);
-        setError(query[2]);
       }
+    }
+
+    if (savedConvoInfo != null) {
+      setConvoInfo({
+        convoId: savedConvoInfo[0],
+        parentMessageId: savedConvoInfo[1],
+      });
     }
   };
 
@@ -88,7 +99,6 @@ const Main = ({ token }) => {
     setShowLoader(true);
     setLoading(true);
     setTimestamp(Date.now());
-    setError(false);
 
     const newController = new AbortController();
     setController(newController);
@@ -98,8 +108,9 @@ const Main = ({ token }) => {
       newController,
       setShowLoader,
       setResponse,
-      setError,
-      token
+      token,
+      convoInfo,
+      setConvoInfo
     );
     setShowLoader(false);
     setLoading(false);
@@ -128,10 +139,35 @@ const Main = ({ token }) => {
     <div className="main-div">
       <div className="logo-div">
         <img src={Logo} className="logo" alt="logo" />
-        <FiHelpCircle
-          className="settings"
-          onClick={() => chrome.runtime.openOptionsPage()}
-        />
+        <div style={{ maxWidth: "200px" }}>
+          <div>
+            {!loading && convoInfo.convoId && token.type === "access" && (
+              <AiOutlineHistory
+                className="settings"
+                onClick={() => {
+                  window.open(
+                    "https://chat.openai.com/chat/" + convoInfo.convoId,
+                    "_blank"
+                  );
+                }}
+              />
+            )}
+            {!loading && token.type === "access" && (
+              <RiChatNewLine
+                className="settings"
+                onClick={async () => {
+                  setConvoInfo({ convoId: null, parentMessageId: null });
+                  await setStorage("convoId", null);
+                  setResponse(null);
+                }}
+              />
+            )}
+            <FiHelpCircle
+              className="settings"
+              onClick={() => chrome.runtime.openOptionsPage()}
+            />
+          </div>
+        </div>
       </div>
       <div className="question-div" ref={ref}>
         <div className="prompt-label">Prompt:</div>
@@ -159,9 +195,9 @@ const Main = ({ token }) => {
         <div className="answer-div">
           <div className="response-label">
             Response:
-            {!loading && copied && !error ? (
+            {!loading && copied ? (
               <AiFillCheckCircle className="copy" />
-            ) : !loading && !copied && !error ? (
+            ) : !loading && !copied ? (
               <RxCopy
                 className="copy"
                 onClick={() => {
@@ -176,32 +212,23 @@ const Main = ({ token }) => {
               <div className="circle-div">
                 <CustomLoader />
               </div>
-            ) : response && !error ? (
+            ) : response ? (
               <div>
                 <div className="response-text">
                   <ReactMarkdown
                     children={response}
                     components={{
                       code({ node, inline, className, children }) {
-                        return inline ? (
-                          <code
-                            style={{
-                              fontSize: "0.7rem",
-                              color: "#fff",
-                            }}
-                          >
-                            {children}
-                          </code>
+                        const match = /language-(\w+)/.exec(className || "");
+                        return match != null && match[1] === "error" ? (
+                          <div className="error-box">
+                            <code className="code-style">{children}</code>
+                          </div>
+                        ) : inline ? (
+                          <code className="code-style">{children}</code>
                         ) : (
                           <div className="highlight-box">
-                            <code
-                              style={{
-                                fontSize: "0.7rem",
-                                color: "#fff",
-                              }}
-                            >
-                              {children}
-                            </code>
+                            <code className="code-style">{children}</code>
                           </div>
                         );
                       },
@@ -209,8 +236,6 @@ const Main = ({ token }) => {
                   />
                 </div>
               </div>
-            ) : response && error ? (
-              <div className="error-text">{response}</div>
             ) : null}
           </div>
         </div>
@@ -224,7 +249,7 @@ const Main = ({ token }) => {
           >
             Search
           </button>
-        ) : (
+        ) : loading && token.type === "access" ? (
           <button
             className="button-disabled"
             type="button"
@@ -232,7 +257,7 @@ const Main = ({ token }) => {
           >
             Cancel
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

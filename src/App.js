@@ -16,6 +16,12 @@ function App() {
     return validToken ? <Main token={token} /> : <Welcome />;
   };
 
+  const setStorage = async (key, value) => {
+    await chrome.storage.local.set({
+      [key]: value,
+    });
+  };
+
   const getStorage = async (key) => {
     const response = await chrome.storage.local.get([key]);
     const value = response[key];
@@ -25,9 +31,16 @@ function App() {
   useEffect(async () => {
     const lock = await getStorage("lock");
     if (lock === true) {
-      const apiKey = await getStorage("apiKey");
-      setToken({ key: apiKey, type: "api" });
-      setValidToken(true);
+      const accessToken = await getStorage("accessToken");
+
+      if (accessToken != null) {
+        setToken({ key: accessToken, type: "access" });
+        setValidToken(true);
+      } else {
+        const apiKey = await getStorage("apiKey");
+        setToken({ key: apiKey, type: "api" });
+        setValidToken(true);
+      }
     } else {
       const controller = new AbortController();
       setTimeout(() => controller.abort("timeout"), 3000);
@@ -48,6 +61,7 @@ function App() {
         } else {
           const data = await resp.json().catch(() => ({}));
           if (data.accessToken) {
+            await setStorage("accessToken", data.accessToken);
             setToken({ key: data.accessToken, type: "access" });
             setValidToken(true);
           } else {
