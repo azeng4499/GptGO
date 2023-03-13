@@ -10,26 +10,20 @@ import { RxCopy } from "react-icons/rx";
 import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
+import { callAPI } from "../Utils/Api";
 
-const Main = () => {
-  const [query, setQuery] = useState();
-  const [response, setResponse] = useState();
-  const [loading, setLoading] = useState(false);
-  const [ended, setEnded] = useState(true);
-
-  const [search, setSearch] = useState(false);
-  const [abort, setAbort] = useState(false);
-
+const Main = ({ token }) => {
+  const [query, setQuery] = useState(null);
+  const [response, setResponse] = useState(null);
+  const [showLoader, setShowLoader] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
   const [timestamp, setTimestamp] = useState(Date.now());
-
-  useEffect(() => {
-    setEnded(!search && !abort);
-  }, [search, abort]);
+  const [controller, setController] = useState(null);
 
   const setStorage = async (key, value) => {
     await chrome.storage.local.set({
@@ -54,40 +48,33 @@ const Main = () => {
   }, []);
 
   chrome.storage.onChanged.addListener(async (changed) => {
-    if (changed.query) {
-      const loading = await getStorage("loading");
-      if (loading === "true") {
-        const query = await getStorage("query");
-        const response = query[1];
-        const error = query[2];
-        if (response != null) {
-          setLoading(false);
-          setError(error);
-          setResponse(response);
-        }
-      }
-    } else if (changed.loading) {
-      if (changed.loading.newValue === "false") {
-        setSearch(false);
-      } else if (changed.loading.newValue === "true") {
-        setSearch(true);
+    if (changed.notfiReady) {
+      setQuery(changed.notfiReady.newValue[0]);
+      setResponse(changed.notfiReady.newValue[1]);
+      setError(changed.notfiReady.newValue[2]);
+    } else if (changed.lock) {
+      if (changed.lock.newValue === true) {
+        setShowLoader(true);
+        setLoading(true);
+      } else {
+        setShowLoader(false);
+        setLoading(false);
       }
     }
   });
 
   const setInfo = async () => {
     const query = await getStorage("query");
-    const loading = await getStorage("loading");
+    const lock = await getStorage("lock");
 
     if (query != null && query[0].trim() != "") {
       setQuery(query[0]);
-      if (loading != null && loading === "true") {
+      if (lock === true) {
+        setShowLoader(true);
         setLoading(true);
-        setEnded(false);
-        setSearch(true);
       } else {
+        setShowLoader(false);
         setLoading(false);
-        setEnded(true);
       }
       if (query[1] != null) {
         setResponse(query[1]);
@@ -97,65 +84,30 @@ const Main = () => {
   };
 
   const handleSearchRequest = async () => {
-    const loading = await getStorage("loading");
-    if (loading == null || loading === "false") {
-      setSearch(true);
-      setResponse(null);
-      setLoading(true);
-      setTimestamp(Date.now());
-      chrome.runtime.sendMessage(
-        {
-          query: query,
-          type: "callAPI",
-        },
-        () => {
-          setSearch(false);
-        }
-      );
-    }
+    setResponse(null);
+    setShowLoader(true);
+    setLoading(true);
+    setTimestamp(Date.now());
+    setError(false);
+
+    const newController = new AbortController();
+    setController(newController);
+
+    await callAPI(
+      query,
+      newController,
+      setShowLoader,
+      setResponse,
+      setError,
+      token
+    );
+    setShowLoader(false);
+    setLoading(false);
   };
 
   const handleCancelRequest = async () => {
     if (Date.now() - timestamp > 250) {
-      setAbort(true);
-      chrome.runtime.sendMessage(
-        {
-          type: "abort",
-        },
-        () => {
-          setAbort(false);
-        }
-      );
-    }
-  };
-
-  const returnButton = () => {
-    if (ended) {
-      return (
-        <button
-          className="button"
-          type="button"
-          onClick={() => handleSearchRequest()}
-        >
-          Search
-        </button>
-      );
-    } else if (search && !abort) {
-      return (
-        <button
-          className="button-disabled"
-          type="button"
-          onClick={() => handleCancelRequest()}
-        >
-          Cancel
-        </button>
-      );
-    } else if (abort) {
-      return (
-        <button className="button-disabled" type="button" disabled={true}>
-          Aborting
-        </button>
-      );
+      controller.abort("user");
     }
   };
 
@@ -193,18 +145,12 @@ const Main = () => {
               ? null
               : "Please highlight a section of text or start typing in this box."
           }
-          disabled={loading}
+          disabled={showLoader}
           onChange={async (e) => {
             if (response) {
               setResponse(null);
             }
-
-            const now = Date.now();
-            if (now - timestamp > 100) {
-              await setStorage("query", [e.target.value, null, false]);
-              setTimestamp(now);
-            }
-
+            await setStorage("query", [e.target.value, null, false]);
             setQuery(e.target.value);
           }}
         />
@@ -213,9 +159,9 @@ const Main = () => {
         <div className="answer-div">
           <div className="response-label">
             Response:
-            {ended && copied && !error ? (
+            {!loading && copied && !error ? (
               <AiFillCheckCircle className="copy" />
-            ) : ended && !copied && !error ? (
+            ) : !loading && !copied && !error ? (
               <RxCopy
                 className="copy"
                 onClick={() => {
@@ -226,7 +172,7 @@ const Main = () => {
             ) : null}
           </div>
           <div className="action-div">
-            {loading ? (
+            {showLoader ? (
               <div className="circle-div">
                 <CustomLoader />
               </div>
@@ -269,7 +215,25 @@ const Main = () => {
           </div>
         </div>
       </div>
-      <div className="button-div">{returnButton()}</div>
+      <div className="button-div">
+        {!loading ? (
+          <button
+            className="button"
+            type="button"
+            onClick={() => handleSearchRequest()}
+          >
+            Search
+          </button>
+        ) : (
+          <button
+            className="button-disabled"
+            type="button"
+            onClick={() => handleCancelRequest()}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </div>
   );
 };

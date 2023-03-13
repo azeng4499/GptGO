@@ -55,33 +55,70 @@
             </ul>
           </div>
         </div>
-        <div class="how-to-steps">
-          <div style="width: 800px; margin-left: 45px; font-style: italic">
-            Still showing log in page even after you logged in? <br />Click on
-            "Manually Enter Access Key" at the bottom of the popup
+        <div
+          class="sub-header"
+          style="font-style: italic; font-size: 1.2rem; margin-bottom: 10px"
+        >
+          <div style="background-color: #00b188">
+            Still showing log in page even after logging in?
           </div>
         </div>
-        <!-- <div class="how-to-steps">
-          <div style="width: 800px; margin-bottom: 25px">
-            <ul>
-              <li>
-                Go to
-                <a
-                  style="color: #fff"
-                  href="http://chat.openai.com/api/auth/session"
-                  target="_blank"
-                  >this link</a
-                >
-                and copy the ENTIRE text
-              </li>
-              <li>
-                Open the GptGO popup and click on "Manually Enter Access Key" at
-                the bottom
-              </li>
-              <li>Paste the ENTIRE text into the input box</li>
-            </ul>
+        <div class="faq" style="margin-bottom: 10px">
+          <div>Expand for steps to enter personal API key</div>
+          <div class="expand" id="expand1">
+            <div id="expandText1">+</div>
           </div>
-        </div> -->
+        </div>
+        <div
+          class="gif-div"
+          style="display: none; background-color: #0082b1"
+          id="faq1"
+        >
+          <div class="how-to-steps">
+            <div
+              style="
+                width: 800px;
+                border: solid;
+                color: #fff;
+                display: flex;
+                flex-direction: column;
+              "
+            >
+              <div style="margin-left: 25px; margin-top: 10px">
+                <span style="color: #ff9966; text-decoration: double"
+                  >Warning: this feature is charged per request.</span
+                >
+                OpenAI grants most new users 3 months free!
+              </div>
+
+              <ul>
+                <li style="margin-top: 5px">
+                  Check that you are eligible for free credits
+                  <a
+                    href="https://platform.openai.com/account/usage"
+                    target="_blank"
+                    style="color: white"
+                    >here</a
+                  >. Make sure you see "Free trial Usage". If you don't see it,
+                  you'll have to pay immediately in order to user GptGO :(
+                </li>
+                <li style="margin-top: 5px">
+                  Head over to
+                  <a
+                    href="https://platform.openai.com/account/api-keys"
+                    target="_blank"
+                    style="color: white"
+                    >API Keys</a
+                  >
+                  to create and copy your API key
+                </li>
+                <li>
+                  <input type="password" />
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="header">How to Use</div>
       <div class="sub-header" style="font-style: italic; font-size: 1.2rem">

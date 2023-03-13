@@ -1,33 +1,138 @@
 import { createParser } from "eventsource-parser";
 import { v4 as uuidv4 } from "uuid";
 
-let controller, timeout;
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    chrome.runtime.openOptionsPage();
+  }
+  if (details.reason === "install" || details.reason === "update") {
+    var uninstallGoogleFormLink =
+      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
+    if (chrome.runtime.setUninstallURL) {
+      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
+    }
 
-const errorMessages = {
-  standard:
-    "A network or API error occurred! Please wait a minute and try again.",
-  network: "Your network is down.",
-  prompt: "Invalid prompt.",
-  denied:
-    "ChatGPT says you are sending too many requests in a row. Please slow down before sending another request.",
-  abort: "User aborted search.",
-  timeout:
-    "Timeout error. This most likely means either your network or ChatGPT is too slow.",
+    await setStorage("lock", false);
+  }
+});
+
+chrome.contextMenus.removeAll(() => {
+  chrome.contextMenus.create({
+    id: "Search + get response as notification",
+    title: "Search + get response as notification",
+    contexts: ["selection"],
+  });
+});
+
+chrome.runtime.onMessage.addListener((request) => {
+  switch (request.type) {
+    case "query":
+      query(request);
+      return true;
+  }
+});
+
+const query = async (request) => {
+  const lock = await getStorage("lock");
+  if (lock === false) {
+    await setStorage("query", [request.payload, null, false]);
+  }
 };
 
-async function getResponse(accessToken, query, limit) {
+chrome.contextMenus.onClicked.addListener(async (info) => {
+  const lock = await getStorage("lock");
+  let response;
+
+  if (lock === false) {
+    setStorage("lock", true);
+    const controllerNotif = new AbortController();
+    setTimeout(() => controllerNotif.abort("timeout"), 5000);
+
+    try {
+      const resp = await fetch("https://chat.openai.com/api/auth/session", {
+        signal: controllerNotif == null ? null : controllerNotif.signal,
+      });
+
+      if (resp.status === 403) {
+        const apiKey = await getStorage("apiKey");
+        if (apiKey != null) {
+          response = await getResponseNotfi(info, apiKey);
+        } else {
+          sendNotification(
+            "Error!!!",
+            "Open the GptGO popup and sign in before sending search requests"
+          );
+        }
+      } else {
+        const data = await resp.json().catch(() => ({}));
+        if (data.accessToken) {
+          response = await getResponseNotfi(info, data.accessToken);
+        } else {
+          sendNotification(
+            "Error!!!",
+            "Open the GptGO popup and sign in before sending search requests"
+          );
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      sendNotification("Error!!!", "There was a problem connecting to ChatGPT");
+    } finally {
+      await setStorage("notfiReady", [
+        info.selectionText,
+        response[0],
+        response[1],
+      ]);
+      setStorage("lock", false);
+    }
+  }
+});
+
+//############################## Helper Functions ###########################
+
+const getResponseNotfi = async (info, token) => {
+  await setStorage("query", [info.selectionText, null, false]);
+  const response = await getResponse(token, info.selectionText);
+  await setStorage("query", [info.selectionText, response[0], response[1]]);
+  sendNotification(
+    response[1] === true ? "Error!!!" : "Response to: " + info.selectionText,
+    response[0].replace(/\n/g, "")
+  );
+  return response;
+};
+
+const sendNotification = (query, response) => {
+  chrome.notifications.create("", {
+    title: query,
+    type: "basic",
+    message: response,
+    iconUrl: "images/logo192.png",
+  });
+};
+
+const getStorage = async (key) => {
+  const response = await chrome.storage.local.get([key]);
+  const value = response[key];
+  return value;
+};
+
+const setStorage = async (key, value) => {
+  await chrome.storage.local.set({
+    [key]: value,
+  });
+};
+
+async function getResponse(accessToken, query) {
   let convoID = null;
   let cleared = false;
-  let timestamp = Date.now();
   let response;
-  const finalQuery = limit
-    ? "Limit your response to 130 characters:\n" + query
-    : query;
+  let timeout;
+  const shortQuery = "Limit your response to 130 characters:\n" + query;
 
   try {
     if (query == null || query.trim() === "") throw new Error("prompt");
 
-    controller = new AbortController();
+    const controller = new AbortController();
     timeout = setTimeout(() => controller.abort("timeout"), 3000);
     const modelName = await getModelName(accessToken, controller);
     clearTimeout(timeout);
@@ -36,7 +141,7 @@ async function getResponse(accessToken, query, limit) {
     await fetchMethod(
       controller,
       accessToken,
-      finalQuery,
+      shortQuery,
       modelName,
       (segment) => {
         if (segment === "[DONE]") return;
@@ -48,11 +153,6 @@ async function getResponse(accessToken, query, limit) {
           }
           if (convoID != data.conversation_id) convoID = data.conversation_id;
           response = data.message.content.parts[0];
-          const now = Date.now();
-          if (now - timestamp > 250) {
-            setStorage("query", [query, data.message.content.parts[0], false]);
-            timestamp = now;
-          }
         } catch (err) {
           return;
         }
@@ -62,169 +162,18 @@ async function getResponse(accessToken, query, limit) {
     timeout = setTimeout(() => controller.abort("timeout"), 3000);
     await clearMessage(convoID, accessToken, controller);
     clearTimeout(timeout);
+
     return [response, false];
   } catch (err) {
     console.log(err);
     clearTimeout(timeout);
-    if (controller == null || err.message === "prompt") {
-      return [errorMessages.prompt, true];
-    } else if (controller.signal.reason === "user") {
-      return [errorMessages.abort, true];
-    } else if (controller.signal.reason === "timeout") {
-      return [errorMessages.timeout, true];
-    } else if (err.message === "fetch") {
-      return [errorMessages.denied, true];
-    } else if (err.name === "NetworkError") {
-      return [errorMessages.network, true];
-    } else {
-      return [errorMessages.standard, true];
-    }
+
+    return [
+      "A network or API error occurred! Please wait a minute and try again.",
+      true,
+    ];
   }
 }
-
-chrome.runtime.onInstalled.addListener(async (details) => {
-  if (details.reason === "install") {
-    chrome.runtime.openOptionsPage();
-  }
-  if (details.reason === "install" || details.reason === "update") {
-    var uninstallGoogleFormLink =
-      "https://docs.google.com/forms/d/e/1FAIpQLSdv3c9RmDmphP1pihYgmNmV6DJ_UxMXq6NNi1oOW5XsIhyxOg/viewform?usp=sf_link";
-    if (chrome.runtime.setUninstallURL) {
-      chrome.runtime.setUninstallURL(uninstallGoogleFormLink);
-    }
-  }
-  if (details.reason === "update") {
-    const loading = await getStorage("loading");
-    if (loading == "true") {
-      setStorage("loading", "false");
-    }
-  }
-});
-
-chrome.contextMenus.removeAll(() => {
-  chrome.contextMenus.create({
-    id: "3",
-    title: "Search + get response as notification",
-    contexts: ["selection"],
-  });
-});
-
-chrome.runtime.onMessage.addListener((request, sender, callBack) => {
-  switch (request.type) {
-    case "query":
-      query(request);
-      return true;
-    case "callAPI":
-      callAPI(request).then(() => {
-        callBack();
-      });
-      return true;
-    case "abort":
-      abort().then(() => {
-        callBack();
-      });
-      return true;
-  }
-});
-
-const getOtherId = async () => {
-  const accessArr = await getStorage("accessArr");
-  if (accessArr != null) {
-    const expireDate = new Date(accessArr[1]);
-    const now = new Date();
-    if (now < expireDate) {
-      return [true, accessArr[0]];
-    } else {
-      return [false, null];
-    }
-  } else {
-    return [false, null];
-  }
-};
-
-chrome.contextMenus.onClicked.addListener(async (info) => {
-  const loading = await getStorage("loading");
-  if (loading == null || loading === "false") {
-    const controllerNotif = new AbortController();
-    setTimeout(() => controllerNotif.abort("timeout"), 5000);
-
-    try {
-      const resp = await fetch("https://chat.openai.com/api/auth/session", {
-        signal: controllerNotif == null ? null : controllerNotif.signal,
-      });
-
-      const otherId = await getOtherId();
-
-      if (resp.status === 403 && otherId[0] === false) {
-        sendNotification(
-          "Error!!!",
-          "Open the GptGO popup and sign in before sending search requests"
-        );
-      } else {
-        let token = null;
-
-        try {
-          const data = await resp.json().catch(() => ({}));
-          if (data.accessToken) {
-            token = data.accessToken;
-          } else {
-            token = otherId[1];
-          }
-        } catch (err) {
-          token = otherId[1];
-        }
-
-        if (token != null) {
-          await setStorage("loading", "true");
-          await setStorage("query", [info.selectionText, null, false]);
-          const response = await getResponse(token, info.selectionText, true);
-          await setStorage("query", [
-            info.selectionText,
-            response[0],
-            response[1],
-          ]);
-          await setStorage("loading", "false");
-          sendNotification(
-            response[1] === true
-              ? "Error!!!"
-              : "Response to: " + info.selectionText,
-            response[0].replace(/\n/g, "")
-          );
-        } else {
-          sendNotification(
-            "Error!!!",
-            "Open the GptGO popup and sign in before sending search requests"
-          );
-        }
-      }
-    } catch (err) {
-      console.log(err);
-      sendNotification("Error!!!", "There was a problem connecting to ChatGPT");
-    }
-  }
-});
-
-//############################## Helper Functions ###########################
-
-const callAPI = async (request) => {
-  await setStorage("loading", "true");
-  await setStorage("query", [request.query, null, false]);
-  const accessToken = await getStorage("accessToken");
-  const response = await getResponse(accessToken, request.query, false);
-  await setStorage("query", [request.query, response[0], response[1]]);
-  await setStorage("loading", "false");
-};
-
-const query = async (request) => {
-  const loading = await getStorage("loading");
-  if (loading == null || loading === "false") {
-    await setStorage("query", [request.payload, null, false]);
-  }
-};
-
-const abort = async () => {
-  controller.abort("user");
-};
 
 async function getModelName(accessToken, controller) {
   const models = await fetch(`https://chat.openai.com/backend-api/models`, {
@@ -268,7 +217,7 @@ async function* streamMethod(stream) {
 async function fetchMethod(
   controller,
   accessToken,
-  finalQuery,
+  query,
   modelName,
   callback
 ) {
@@ -287,7 +236,7 @@ async function fetchMethod(
           role: "user",
           content: {
             content_type: "text",
-            parts: [finalQuery],
+            parts: [query],
           },
         },
       ],
@@ -309,24 +258,3 @@ async function fetchMethod(
     parser.feed(decoded);
   }
 }
-
-const sendNotification = (query, response) => {
-  chrome.notifications.create("", {
-    title: query,
-    type: "basic",
-    message: response,
-    iconUrl: "images/logo192.png",
-  });
-};
-
-const getStorage = async (key) => {
-  const response = await chrome.storage.local.get([key]);
-  const value = response[key];
-  return value;
-};
-
-const setStorage = async (key, value) => {
-  await chrome.storage.local.set({
-    [key]: value,
-  });
-};

@@ -23,7 +23,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["storage", "contextMenus", "notifications"],
+  "permissions": ["storage", "contextMenus", "notifications", "tabs"],
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],

@@ -5,7 +5,7 @@ import "./Welcome.css";
 import Logo from "../../images/logo.png";
 import LogIn from "../../images/log-in.svg";
 
-const Welcome = ({ setClickedMan }) => {
+const Welcome = () => {
   return (
     <div className="main-div-welcome">
       <img src={Logo} className="logo-welcome" alt="logo-welcome" />
@@ -45,24 +45,22 @@ const Welcome = ({ setClickedMan }) => {
           justifyContent: "center",
           alignItems: "center",
           color: "white",
-          fontSize: "0.5rem",
+          fontSize: "0.6rem",
           gap: "5px",
-          flexDirection: "column",
           marginBottom: "10px",
         }}
       >
-        <div>Log in didn't work or keep getting signed out?</div>
+        <div>Or</div>
         <div
           style={{
             cursor: "pointer",
             textDecoration: "underline",
-            fontSize: "0.6rem",
           }}
           onClick={() => {
-            setClickedMan(true);
+            chrome.runtime.openOptionsPage();
           }}
         >
-          Manually Enter Access Key
+          Enter Personal API Key
         </div>
       </div>
     </div>
