@@ -64,7 +64,7 @@
           </div>
         </div>
         <div class="faq" style="margin-bottom: 10px">
-          <div>Try using your personal API key</div>
+          <div>Expand for steps to enter personal API key</div>
           <div class="expand" id="api-expand">
             <div id="api-expand-text">+</div>
           </div>
@@ -86,55 +86,107 @@
             >
               <div style="margin-left: 25px; margin-top: 10px">
                 <span style="background-color: #ff9966; text-decoration: double"
-                  >Warning: this feature is costs money.</span
+                  >Warning: this feature costs money.</span
                 >
-                <span style="text-decoration: underline"
+                <span style="font-style: italic"
                   >However, OpenAI grants most new users 3 months free!</span
                 >
               </div>
 
               <ul>
                 <li style="margin-top: 5px">
-                  To see if you have free credits, go
+                  Go to your
                   <a
-                    href="https://platform.openai.com/account/usage"
+                    href="https://platform.openai.com/account/billing/overview"
                     target="_blank"
                     style="color: white"
-                    >here</a
-                  >
-                  and make sure you see "Free trial Usage".
+                    >account billing page
+                  </a>
+                  to check if you have remaining free trial credits. You can
+                  also switch to a paid plan from this link.
                 </li>
                 <li style="margin-top: 5px">
-                  Head over to
+                  Go to your
                   <a
                     href="https://platform.openai.com/account/api-keys"
                     target="_blank"
                     style="color: white"
-                    >API Keys</a
+                    >account API keys page</a
                   >
                   to create and copy your API key
                 </li>
                 <li style="margin-top: 10px">
-                  <div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: flex-start;
+                      align-items: center;
+                      gap: 20px;
+                    "
+                  >
                     <input
                       type="password"
                       id="api-input"
                       placeholder="Paste your key here..."
                       style="
                         height: 20px;
-                        width: 300px;
+                        width: 250px;
                         font-size: 0.8rem;
                         border: solid white;
                         outline: none;
                       "
                     />
-                    <button type="button" id="api-enter">Enter</button>
+                    <button
+                      type="button"
+                      id="api-enter"
+                      style="
+                        color: black;
+                        border: solid 1px white;
+                        border-radius: 3px;
+                        height: 20px;
+                      "
+                    >
+                      Enter
+                    </button>
+                    <div
+                      style="
+                        height: 20px;
+                        width: 100px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        text-align: center;
+                      "
+                      id="api-status"
+                    ></div>
                   </div>
                 </li>
                 <li style="margin-top: 10px">
-                  Congrats! you will now search with your API key instead of
-                  using the browser version. If you ever need to change the key
-                  you're using, just re-paste it into the box above.
+                  Congrats! you're now using the API version of GptGO.
+                  <span style="color: black; font-weight: bold"
+                    >You'll get faster and more reliable responses even when the
+                    ChatGPT website is down.</span
+                  >
+                  If you ever need to change the key you're using, just enter
+                  the new one into the input again.
+                </li>
+                <li style="margin-top: 10px">
+                  You can always check how much money you've spent on your
+                  <a
+                    href="https://platform.openai.com/account/usage"
+                    target="_blank"
+                    style="color: white"
+                    >account usage page</a
+                  >
+                </li>
+                <li style="margin-top: 10px">
+                  For pricing info, visit OpenAI's
+                  <a
+                    href="https://openai.com/pricing"
+                    target="_blank"
+                    style="color: white"
+                    >pricing page.</a
+                  >
                 </li>
               </ul>
             </div>
@@ -151,7 +203,8 @@
             <ul style="gap: 10px">
               <li>Highlight any section of text with your cursor</li>
               <li>
-                Right click and select "Search + get response as notification"
+                Right click, hover over GptGO, and select "Search + get response
+                as notification"
               </li>
               <li>
                 Within a few seconds, you should receive a notification with
@@ -262,9 +315,9 @@
             >
               <div style="width: 125px">Tip 2:</div>
               <div>
-                GptGO can't pick up highlighted text on embedded content such as
-                PDFs and Google Docs. In this case, just copy and paste your
-                text into the prompt section
+                Some websites don't let GptGO automatically pick up highlighted
+                text. If this happens, you can right click and select "Send text
+                to popup"
               </div>
             </div>
           </div>
@@ -362,7 +415,13 @@
     <div class="gif-div">
       <div
         class="how-to-steps"
-        style="height: 300px; overflow-y: scroll; border: solid; padding: 10px"
+        style="
+          height: 300px;
+          overflow-y: scroll;
+          border: solid;
+          padding: 10px;
+          border-radius: 5px;
+        "
       >
         Welcome to the GptGO Chrome Extension ("GptGO" or the "Extension"). This
         Extension utilizes the OpenAI's ChatGPT API (the "API") to provide users
@@ -388,14 +447,11 @@
             questions hold no academic merit and are meant to only be a
             demonstration of the Extension's capabilities. GptGO does not
             support any form of cheating including but not limited to
-            plagiarism, impersonation, or illegal use of online resources.
-            <span style="color: red"
-              >Users are not permitted to use GptGO for any purpose that may
-              result in academic dishonesty.</span
-            >
-            The user assumes full responsibility for their actions and any
-            consequences that may arise as a result of using GptGO in an
-            unethical or illegal manner.
+            plagiarism, impersonation, or illegal use of online resources. Users
+            are not permitted to use GptGO for any purpose that may result in
+            academic dishonesty. The user assumes full responsibility for their
+            actions and any consequences that may arise as a result of using
+            GptGO in an unethical or illegal manner.
           </li>
         </ul>
         Disclaimer of Warranties
@@ -416,6 +472,36 @@
             liable for any damages of any kind arising from the use of GptGO or
             the API, including, but not limited to, direct, indirect,
             incidental, punitive, and consequential damages.
+          </li>
+        </ul>
+        ChatGPT API Costs
+        <br />
+        <ul>
+          <li>
+            For usings using the ChatGPT API, you acknowledge and agree that any
+            costs incurred from using the ChatGPT API shall be your sole
+            responsibility. This includes but is not limited to fees for API
+            calls, data transfer, or any other charges associated with using the
+            ChatGPT API.
+          </li>
+          <li>
+            You understand that the ChatGPT API may be subject to usage limits
+            or fees determined by OpenAI, the provider of the API. You agree to
+            comply with any usage limits or guidelines imposed by OpenAI in
+            connection with your use of the ChatGPT API, and to pay all fees or
+            costs associated with your use of the API.
+          </li>
+          <li>
+            You agree to indemnify and hold harmless the developer of the
+            ChatGPT chrome extension from any claims, damages, or expenses
+            arising out of your use of the ChatGPT API, including any costs or
+            fees associated with such use.
+          </li>
+          <li>
+            If you do not agree to be responsible for all costs associated with
+            using the ChatGPT API, you should not use GptGO. By using the
+            extension, you acknowledge that you have read, understood, and
+            agreed to the terms and conditions set forth in this section.
           </li>
         </ul>
         Changes to Terms of Service

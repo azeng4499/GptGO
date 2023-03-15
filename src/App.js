@@ -50,6 +50,8 @@ function App() {
           signal: controller ? controller.signal : null,
         });
 
+        // const resp = { status: 403 };
+
         if (resp.status === 403) {
           const apiKey = await getStorage("apiKey");
           if (apiKey != null) {

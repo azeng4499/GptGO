@@ -1,6 +1,5 @@
 import { createParser } from "eventsource-parser";
 import { v4 as uuidv4 } from "uuid";
-import { Configuration, OpenAIApi } from "openai";
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === "install") {
@@ -14,6 +13,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     }
 
     await setStorage("lock", false);
+    await setStorage("apiKey", null);
+    await setStorage("accessToken", null);
+    await setStorage("convoInfo", null);
   }
 });
 
@@ -21,6 +23,11 @@ chrome.contextMenus.removeAll(() => {
   chrome.contextMenus.create({
     id: "Search + get response as notification",
     title: "Search + get response as notification",
+    contexts: ["selection"],
+  });
+  chrome.contextMenus.create({
+    id: "Send text to popup",
+    title: "Send text to popup",
     contexts: ["selection"],
   });
 });
@@ -42,51 +49,66 @@ const query = async (request) => {
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
   const lock = await getStorage("lock");
-  let response;
-
   if (lock === false) {
-    setStorage("lock", true);
-    const controllerNotif = new AbortController();
-    setTimeout(() => controllerNotif.abort("timeout"), 5000);
+    if (info.menuItemId === "Search + get response as notification") {
+      let response;
 
-    try {
-      const resp = await fetch("https://chat.openai.com/api/auth/session", {
-        signal: controllerNotif == null ? null : controllerNotif.signal,
-      });
+      setStorage("lock", true);
+      const controllerNotif = new AbortController();
+      setTimeout(() => controllerNotif.abort("timeout"), 5000);
 
-      if (resp.status === 403) {
-        const apiKey = await getStorage("apiKey");
-        if (apiKey != null) {
-          response = await getResponseNotfi(info, apiKey, "api");
+      try {
+        const resp = await fetch("https://chat.openai.com/api/auth/session", {
+          signal: controllerNotif == null ? null : controllerNotif.signal,
+        });
+
+        // const resp = { status: 403 };
+
+        if (resp.status === 403) {
+          const apiKey = await getStorage("apiKey");
+          if (apiKey != null) {
+            response = await getResponseNotfi(info, apiKey, "api");
+
+            await setStorage("notfiReady", [
+              info.selectionText,
+              response[0],
+              response[1],
+            ]);
+          } else {
+            sendNotification(
+              "Error!!!",
+              "Open the GptGO popup and sign in before sending search requests"
+            );
+          }
         } else {
-          sendNotification(
-            "Error!!!",
-            "Open the GptGO popup and sign in before sending search requests"
-          );
+          const data = await resp.json().catch(() => ({}));
+          if (data.accessToken) {
+            await setStorage("accessToken", data.accessToken);
+            response = await getResponseNotfi(info, data.accessToken, "access");
+
+            await setStorage("notfiReady", [
+              info.selectionText,
+              response[0],
+              response[1],
+            ]);
+          } else {
+            sendNotification(
+              "Error!!!",
+              "Open the GptGO popup and sign in before sending search requests"
+            );
+          }
         }
-      } else {
-        const data = await resp.json().catch(() => ({}));
-        if (data.accessToken) {
-          await setStorage("accessToken", data.accessToken);
-          response = await getResponseNotfi(info, data.accessToken, "access");
-        } else {
-          sendNotification(
-            "Error!!!",
-            "Open the GptGO popup and sign in before sending search requests"
-          );
-        }
+      } catch (err) {
+        console.log(err);
+        sendNotification(
+          "Error!!!",
+          "There was a problem connecting to ChatGPT"
+        );
+      } finally {
+        setStorage("lock", false);
       }
-    } catch (err) {
-      console.log(err);
-      sendNotification("Error!!!", "There was a problem connecting to ChatGPT");
-    } finally {
-      await setStorage("notfiReady", [
-        info.selectionText,
-        response[0],
-        response[1],
-      ]);
-
-      setStorage("lock", false);
+    } else {
+      await setStorage("query", [info.selectionText, null]);
     }
   }
 });
@@ -107,7 +129,7 @@ const getResponseNotfi = async (info, token, type) => {
   if (response[1] === true) {
     await setStorage("query", [
       info.selectionText,
-      "\n\n```error\n🛑 A network or API error occurred! 🛑\n``",
+      "\n\n```error\n🛑 A network or API error occurred! 🛑\n```",
     ]);
   } else {
     await setStorage("query", [info.selectionText, response[0]]);
@@ -172,17 +194,21 @@ async function getResponse(accessToken, query) {
 
 const getResponseAPI = async (token, query) => {
   try {
-    const configuration = new Configuration({
-      apiKey: token,
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: query }],
+      }),
     });
-    const openai = new OpenAIApi(configuration);
 
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: query }],
-    });
+    const data = await resp.json();
 
-    return [completion.data.choices[0].message, false];
+    return [data.choices[0].message.content, false];
   } catch (err) {
     console.log(err);
     return ["A network or API error occurred!", true];

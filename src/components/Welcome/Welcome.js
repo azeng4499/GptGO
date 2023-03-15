@@ -50,7 +50,7 @@ const Welcome = () => {
           marginBottom: "10px",
         }}
       >
-        <div>Or</div>
+        <div>Log in not working? </div>
         <div
           style={{
             cursor: "pointer",

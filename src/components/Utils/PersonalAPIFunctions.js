@@ -49,8 +49,8 @@ export const getResponseAPI = async (
       await setStorage("query", [query, errorMessages.invalidKey]);
       setResponse(errorMessages.invalidKey);
     } else {
-      await setStorage("query", [query, errorMessages.standard]);
-      setResponse(errorMessages.standard);
+      await setStorage("query", [query, response + errorMessages.standard]);
+      setResponse(response + errorMessages.standard);
     }
   } finally {
     setShowLoader(false);
@@ -67,7 +67,7 @@ async function fetchMethodAPI(token, query, callback) {
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: query }],
+      messages: [{ role: "user", content: query }],        
       stream: true,
     }),
   });

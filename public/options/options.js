@@ -29,6 +29,13 @@ const load = async () => {
     document.getElementById("agree-button").style.display = "none";
     document.getElementById("welcome-header").style.display = "none";
   }
+
+  const apiKeyResponse = await chrome.storage.local.get(["apiKey"]);
+  const apiKey = apiKeyResponse["apiKey"];
+
+  if (apiKey != null) {
+    document.getElementById("api-input").value = apiKey;
+  }
 };
 
 (function () {
@@ -44,10 +51,18 @@ const load = async () => {
       .getElementById("api-enter")
       .addEventListener("click", async (event) => {
         const apiKey = document.getElementById("api-input").value;
-        await chrome.storage.local.set({
-          apiKey: apiKey,
-        });
-        console.log("oka");
+
+        if (apiKey != "") {
+          await chrome.storage.local.set({
+            apiKey: apiKey,
+          });
+          await chrome.storage.local.set({
+            query: null,
+          });
+          document.getElementById("api-status").innerHTML = "Saved";
+          document.getElementById("api-status").style.backgroundColor =
+            "#00b188";
+        }
       });
     document.getElementById("api-expand").addEventListener("click", () => {
       const state = document.getElementById("api-expand-text").innerHTML;

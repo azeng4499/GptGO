@@ -1,18 +1,18 @@
 /* global chrome */
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { FiHelpCircle } from "react-icons/fi";
 import "./Main.css";
 import Logo from "../../images/logo.png";
 import CustomLoader from "../CustomLoader/CustomLoader";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
-import { AiFillCheckCircle, AiOutlineHistory } from "react-icons/ai";
+import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
 import { callAPI } from "../Utils/Api";
-import { RiChatNewLine } from "react-icons/ri";
-import { toBeEmpty } from "@testing-library/jest-dom/dist/matchers";
+import { RiChatNewLine, RiHistoryFill } from "react-icons/ri";
+import { TbApi } from "react-icons/tb";
 
 const Main = ({ token }) => {
   const [query, setQuery] = useState(null);
@@ -20,7 +20,6 @@ const Main = ({ token }) => {
   const [showLoader, setShowLoader] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const ref = useRef(null);
   const [height, setHeight] = useState();
   const [clipboard, setClipboard] = useClippy();
   const [timestamp, setTimestamp] = useState(Date.now());
@@ -41,12 +40,6 @@ const Main = ({ token }) => {
     const value = response[key];
     return value;
   };
-
-  useEffect(() => {
-    if (ref.current.clientHeight !== height) {
-      setHeight(ref.current.clientHeight);
-    }
-  }, [query]);
 
   useEffect(async () => {
     await setInfo();
@@ -95,25 +88,27 @@ const Main = ({ token }) => {
   };
 
   const handleSearchRequest = async () => {
-    setResponse(null);
-    setShowLoader(true);
-    setLoading(true);
-    setTimestamp(Date.now());
+    if (!loading) {
+      setResponse(null);
+      setShowLoader(true);
+      setLoading(true);
+      setTimestamp(Date.now());
 
-    const newController = new AbortController();
-    setController(newController);
+      const newController = new AbortController();
+      setController(newController);
 
-    await callAPI(
-      query,
-      newController,
-      setShowLoader,
-      setResponse,
-      token,
-      convoInfo,
-      setConvoInfo
-    );
-    setShowLoader(false);
-    setLoading(false);
+      await callAPI(
+        query,
+        newController,
+        setShowLoader,
+        setResponse,
+        token,
+        convoInfo,
+        setConvoInfo
+      );
+      setShowLoader(false);
+      setLoading(false);
+    }
   };
 
   const handleCancelRequest = async () => {
@@ -139,37 +134,36 @@ const Main = ({ token }) => {
     <div className="main-div">
       <div className="logo-div">
         <img src={Logo} className="logo" alt="logo" />
-        <div style={{ maxWidth: "200px" }}>
-          <div>
-            {!loading && convoInfo.convoId && token.type === "access" && (
-              <AiOutlineHistory
-                className="settings"
-                onClick={() => {
-                  window.open(
-                    "https://chat.openai.com/chat/" + convoInfo.convoId,
-                    "_blank"
-                  );
-                }}
-              />
-            )}
-            {!loading && token.type === "access" && (
-              <RiChatNewLine
-                className="settings"
-                onClick={async () => {
-                  setConvoInfo({ convoId: null, parentMessageId: null });
-                  await setStorage("convoId", null);
-                  setResponse(null);
-                }}
-              />
-            )}
-            <FiHelpCircle
+        <div style={{ maxWidth: "200px", display: "flex" }}>
+          {token.type === "api" && <TbApi className="settings" />}
+          {!loading && convoInfo.convoId && token.type === "access" && (
+            <RiHistoryFill
               className="settings"
-              onClick={() => chrome.runtime.openOptionsPage()}
+              onClick={() => {
+                window.open(
+                  "https://chat.openai.com/chat/" + convoInfo.convoId,
+                  "_blank"
+                );
+              }}
             />
-          </div>
+          )}
+          {!loading && token.type === "access" && (
+            <RiChatNewLine
+              className="settings"
+              onClick={async () => {
+                setConvoInfo({ convoId: null, parentMessageId: null });
+                await setStorage("convoInfo", null);
+                setResponse(null);
+              }}
+            />
+          )}
+          <FiHelpCircle
+            className="settings"
+            onClick={() => chrome.runtime.openOptionsPage()}
+          />
         </div>
       </div>
-      <div className="question-div" ref={ref}>
+      <div className="question-div">
         <div className="prompt-label">Prompt:</div>
         <TextareaAutosize
           minRows={1}
@@ -181,6 +175,7 @@ const Main = ({ token }) => {
               ? null
               : "Please highlight a section of text or start typing in this box."
           }
+          onHeightChange={(height) => setHeight(height)}
           disabled={showLoader}
           onChange={async (e) => {
             if (response) {
@@ -191,7 +186,7 @@ const Main = ({ token }) => {
           }}
         />
       </div>
-      <div className="answer-container" style={{ height: 435 - height }}>
+      <div className="answer-container" style={{ height: 410 - height }}>
         <div className="answer-div">
           <div className="response-label">
             Response:
@@ -242,20 +237,40 @@ const Main = ({ token }) => {
       </div>
       <div className="button-div">
         {!loading ? (
-          <button
-            className="button"
-            type="button"
-            onClick={() => handleSearchRequest()}
-          >
-            Search
-          </button>
+          <div>
+            <button
+              className="button"
+              type="button"
+              onClick={() => handleSearchRequest()}
+            >
+              <span className="text">Search</span>
+              <div className="icon-container">
+                <div className="icon icon--left">
+                  <svg>
+                    <use xlinkHref="#arrow-right"></use>
+                  </svg>
+                </div>
+                <div className="icon icon--right">
+                  <svg>
+                    <use xlinkHref="#arrow-right"></use>
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            <svg style={{ display: "none" }}>
+              <symbol id="arrow-right" viewBox="0 0 20 10">
+                <path d="M14.84 0l-1.08 1.06 3.3 3.2H0v1.49h17.05l-3.3 3.2L14.84 10 20 5l-5.16-5z"></path>
+              </symbol>
+            </svg>
+          </div>
         ) : loading && token.type === "access" ? (
           <button
             className="button-disabled"
             type="button"
             onClick={() => handleCancelRequest()}
           >
-            Cancel
+            Stop Generating
           </button>
         ) : null}
       </div>
