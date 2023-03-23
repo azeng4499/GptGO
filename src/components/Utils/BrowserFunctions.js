@@ -1,6 +1,6 @@
 import { createParser } from "eventsource-parser";
 import { v4 as uuidv4 } from "uuid";
-import { errorMessages, streamMethod, setStorage } from "./Shared";
+import { errorMessages, streamMethod, setStorage, getStorage } from "./Shared";
 
 export async function getResponse(
   accessToken,
@@ -20,7 +20,7 @@ export async function getResponse(
     if (query == null || query.trim() === "") throw new Error("prompt");
 
     timeout = setTimeout(() => controller.abort("timeout"), 3000);
-    const modelName = await getModelName(accessToken, controller);
+    const modelName = await getModelName(accessToken, controller, convoInfo);
     clearTimeout(timeout);
     timeout = setTimeout(() => controller.abort("timeout"), 15000);
 
@@ -28,7 +28,7 @@ export async function getResponse(
       controller,
       accessToken,
       query,
-      modelName,
+      modelName[0],
       convoInfo,
       (segment) => {
         if (segment === "[DONE]") return;
@@ -38,7 +38,9 @@ export async function getResponse(
             setShowLoader(false);
             clearTimeout(timeout);
             setConvoInfo({
+              ...convoInfo,
               convoId: data.conversation_id,
+              v4Available: modelName[1],
               parentMessageId: data.message.id,
             });
             setStorage("convoInfo", [data.conversation_id, data.message.id]);
@@ -90,7 +92,7 @@ export async function getResponse(
   }
 }
 
-async function getModelName(accessToken, controller) {
+async function getModelName(accessToken, controller, convoInfo) {
   const models = await fetch(`https://chat.openai.com/backend-api/models`, {
     method: "GET",
     signal: controller == null ? null : controller.signal,
@@ -100,7 +102,17 @@ async function getModelName(accessToken, controller) {
     },
   });
   const modelsJson = await models.json();
-  return modelsJson.models[0].slug;
+
+  let gpt4 = false;
+
+  modelsJson.models.forEach((model) => {
+    if (model.slug === "gpt-4") {
+      gpt4 = true;
+      setStorage("gpt4-info", [true, convoInfo.v4Active]);
+    }
+  });
+
+  return [modelsJson.models[0].slug, gpt4];
 }
 
 async function fetchMethod(
@@ -131,7 +143,7 @@ async function fetchMethod(
           },
         },
       ],
-      model: modelName,
+      model: convoInfo.v4Active ? "gpt-4" : modelName,
       parent_message_id: convoInfo.parentMessageId
         ? convoInfo.parentMessageId
         : uuidv4(),

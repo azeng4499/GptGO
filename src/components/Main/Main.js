@@ -1,9 +1,7 @@
 /* global chrome */
 
 import React, { useEffect, useState } from "react";
-import { FiHelpCircle } from "react-icons/fi";
 import "./Main.css";
-import Logo from "../../images/logo.png";
 import CustomLoader from "../CustomLoader/CustomLoader";
 import TextareaAutosize from "react-textarea-autosize";
 import { RxCopy } from "react-icons/rx";
@@ -11,8 +9,8 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import useClippy from "use-clippy";
 import ReactMarkdown from "react-markdown";
 import { callAPI } from "../Utils/Api";
-import { RiChatNewLine, RiHistoryFill } from "react-icons/ri";
-import { TbApi } from "react-icons/tb";
+import SettingsMenu from "../SettingsMenu/SettingsMenu.";
+import { setStorage, getStorage } from "../Utils/Shared";
 
 const Main = ({ token }) => {
   const [query, setQuery] = useState(null);
@@ -27,22 +25,45 @@ const Main = ({ token }) => {
   const [convoInfo, setConvoInfo] = useState({
     convoId: null,
     parentMessageId: null,
+    v4Active: false,
+    v4Available: false,
   });
 
-  const setStorage = async (key, value) => {
-    await chrome.storage.local.set({
-      [key]: value,
-    });
-  };
+  useEffect(() => {
+    console.log(convoInfo);
+  }, [convoInfo]);
 
-  const getStorage = async (key) => {
-    const response = await chrome.storage.local.get([key]);
-    const value = response[key];
-    return value;
-  };
+  useEffect(() => {
+    const setInfo = async () => {
+      const query = await getStorage("query");
+      const lock = await getStorage("lock");
+      const savedConvoInfo = await getStorage("convoInfo");
+      const gpt4info = await getStorage("gpt4-info");
 
-  useEffect(async () => {
-    await setInfo();
+      if (query != null && query[0].trim() !== "") {
+        setQuery(query[0]);
+        if (lock === true) {
+          setShowLoader(true);
+          setLoading(true);
+        } else {
+          setShowLoader(false);
+          setLoading(false);
+        }
+        if (query[1] != null) {
+          setResponse(query[1]);
+        }
+      }
+
+      if (savedConvoInfo != null) {
+        setConvoInfo({
+          convoId: savedConvoInfo[0],
+          parentMessageId: savedConvoInfo[1],
+          v4Active: gpt4info[1],
+          v4Available: gpt4info[0],
+        });
+      }
+    };
+    setInfo();
   }, []);
 
   chrome.storage.onChanged.addListener(async (changed) => {
@@ -59,33 +80,6 @@ const Main = ({ token }) => {
       }
     }
   });
-
-  const setInfo = async () => {
-    const query = await getStorage("query");
-    const lock = await getStorage("lock");
-    const savedConvoInfo = await getStorage("convoInfo");
-
-    if (query != null && query[0].trim() != "") {
-      setQuery(query[0]);
-      if (lock === true) {
-        setShowLoader(true);
-        setLoading(true);
-      } else {
-        setShowLoader(false);
-        setLoading(false);
-      }
-      if (query[1] != null) {
-        setResponse(query[1]);
-      }
-    }
-
-    if (savedConvoInfo != null) {
-      setConvoInfo({
-        convoId: savedConvoInfo[0],
-        parentMessageId: savedConvoInfo[1],
-      });
-    }
-  };
 
   const handleSearchRequest = async () => {
     if (!loading) {
@@ -132,37 +126,13 @@ const Main = ({ token }) => {
 
   return (
     <div className="main-div">
-      <div className="logo-div">
-        <img src={Logo} className="logo" alt="logo" />
-        <div style={{ maxWidth: "200px", display: "flex" }}>
-          {token.type === "api" && <TbApi className="settings" />}
-          {!loading && convoInfo.convoId && token.type === "access" && (
-            <RiHistoryFill
-              className="settings"
-              onClick={() => {
-                window.open(
-                  "https://chat.openai.com/chat/" + convoInfo.convoId,
-                  "_blank"
-                );
-              }}
-            />
-          )}
-          {!loading && token.type === "access" && (
-            <RiChatNewLine
-              className="settings"
-              onClick={async () => {
-                setConvoInfo({ convoId: null, parentMessageId: null });
-                await setStorage("convoInfo", null);
-                setResponse(null);
-              }}
-            />
-          )}
-          <FiHelpCircle
-            className="settings"
-            onClick={() => chrome.runtime.openOptionsPage()}
-          />
-        </div>
-      </div>
+      <SettingsMenu
+        loading={loading}
+        convoInfo={convoInfo}
+        setConvoInfo={setConvoInfo}
+        token={token}
+        setResponse={setResponse}
+      />
       <div className="question-div">
         <div className="prompt-label">Prompt:</div>
         <TextareaAutosize

@@ -28,54 +28,58 @@ function App() {
     return value;
   };
 
-  useEffect(async () => {
-    const lock = await getStorage("lock");
-    if (lock === true) {
-      const accessToken = await getStorage("accessToken");
+  useEffect(() => {
+    const load = async () => {
+      const lock = await getStorage("lock");
+      if (lock === true) {
+        const accessToken = await getStorage("accessToken");
 
-      if (accessToken != null) {
-        setToken({ key: accessToken, type: "access" });
-        setValidToken(true);
-      } else {
-        const apiKey = await getStorage("apiKey");
-        setToken({ key: apiKey, type: "api" });
-        setValidToken(true);
-      }
-    } else {
-      const controller = new AbortController();
-      setTimeout(() => controller.abort("timeout"), 3000);
-
-      try {
-        const resp = await fetch("http://chat.openai.com/api/auth/session", {
-          signal: controller ? controller.signal : null,
-        });
-
-        // const resp = { status: 403 };
-
-        if (resp.status === 403) {
-          const apiKey = await getStorage("apiKey");
-          if (apiKey != null) {
-            setToken({ key: apiKey, type: "api" });
-            setValidToken(true);
-          } else {
-            setValidToken(false);
-          }
+        if (accessToken != null) {
+          setToken({ key: accessToken, type: "access" });
+          setValidToken(true);
         } else {
-          const data = await resp.json().catch(() => ({}));
-          if (data.accessToken) {
-            await setStorage("accessToken", data.accessToken);
-            setToken({ key: data.accessToken, type: "access" });
-            setValidToken(true);
-          } else {
-            setValidToken(false);
-          }
+          const apiKey = await getStorage("apiKey");
+          setToken({ key: apiKey, type: "api" });
+          setValidToken(true);
         }
-      } catch (err) {
-        console.log(err);
-        setNoWifi(true);
-        setValidToken(false);
+      } else {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort("timeout"), 3000);
+
+        try {
+          const resp = await fetch("http://chat.openai.com/api/auth/session", {
+            signal: controller ? controller.signal : null,
+          });
+
+          // const resp = { status: 403 };
+
+          if (resp.status === 403) {
+            const apiKey = await getStorage("apiKey");
+            if (apiKey != null) {
+              setToken({ key: apiKey, type: "api" });
+              setValidToken(true);
+            } else {
+              setValidToken(false);
+            }
+          } else {
+            const data = await resp.json().catch(() => ({}));
+            if (data.accessToken) {
+              await setStorage("accessToken", data.accessToken);
+              setToken({ key: data.accessToken, type: "access" });
+              setValidToken(true);
+            } else {
+              setValidToken(false);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+          setNoWifi(true);
+          setValidToken(false);
+        }
       }
-    }
+    };
+
+    load();
   }, []);
 
   return (

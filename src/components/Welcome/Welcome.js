@@ -12,6 +12,7 @@ const Welcome = () => {
 
       <img
         src={LogIn}
+        alt="logo-welcome"
         style={{
           height: "200px",
           width: "200px",

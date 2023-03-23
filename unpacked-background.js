@@ -16,6 +16,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await setStorage("apiKey", null);
     await setStorage("accessToken", null);
     await setStorage("convoInfo", null);
+    await setStorage("gpt4-info", [false, false]);
   }
 });
 

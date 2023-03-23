@@ -16,6 +16,7 @@
   margin-left: 25px;
   margin-top: 10px;
   margin-bottom: 20px;
+  user-select: none;
 }
 
 .prompt-label {
@@ -38,6 +39,7 @@
   padding: 8px 0px;
   display: flex;
   justify-content: space-between;
+  user-select: none;
 }
 
 .question-div {
@@ -127,6 +129,10 @@
   /* margin-top: -25px; */
 }
 
+::selection {
+  background: #000;
+}
+
 .error-text {
   color: #ff0000;
   font-family: "Prompt", sans-serif;
@@ -214,6 +220,7 @@
   position: relative;
   border-radius: 5px;
   color: #fff;
+  user-select: none;
 
   font-family: "Prompt", sans-serif;
 

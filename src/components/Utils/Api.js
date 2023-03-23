@@ -1,5 +1,3 @@
-/* global chrome */
-
 import { getResponse } from "./BrowserFunctions";
 import { getResponseAPI } from "./PersonalAPIFunctions";
 import { setStorage } from "./Shared";
