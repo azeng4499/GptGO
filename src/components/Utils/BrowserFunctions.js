@@ -19,7 +19,7 @@ export async function getResponse(
   try {
     if (query == null || query.trim() === "") throw new Error("prompt");
 
-    timeout = setTimeout(() => controller.abort("timeout"), 3000);
+    timeout = setTimeout(() => controller.abort("timeout"), 15000);
     const modelName = await getModelName(accessToken, controller, convoInfo);
     clearTimeout(timeout);
     timeout = setTimeout(() => controller.abort("timeout"), 15000);

@@ -44,7 +44,7 @@ function App() {
         }
       } else {
         const controller = new AbortController();
-        setTimeout(() => controller.abort("timeout"), 3000);
+        setTimeout(() => controller.abort("timeout"), 15000);
 
         try {
           const resp = await fetch("http://chat.openai.com/api/auth/session", {

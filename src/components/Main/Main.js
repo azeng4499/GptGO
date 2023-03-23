@@ -146,7 +146,7 @@ const Main = ({ token }) => {
               : "Please highlight a section of text or start typing in this box."
           }
           onHeightChange={(height) => setHeight(height)}
-          disabled={showLoader}
+          disabled={loading}
           onChange={async (e) => {
             if (response) {
               setResponse(null);

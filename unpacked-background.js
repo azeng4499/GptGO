@@ -56,7 +56,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
 
       setStorage("lock", true);
       const controllerNotif = new AbortController();
-      setTimeout(() => controllerNotif.abort("timeout"), 5000);
+      setTimeout(() => controllerNotif.abort("timeout"), 15000);
 
       try {
         const resp = await fetch("https://chat.openai.com/api/auth/session", {
@@ -154,7 +154,7 @@ async function getResponse(accessToken, query) {
     if (query == null || query.trim() === "") throw new Error("prompt");
 
     const controller = new AbortController();
-    timeout = setTimeout(() => controller.abort("timeout"), 3000);
+    timeout = setTimeout(() => controller.abort("timeout"), 15000);
     const modelName = await getModelName(accessToken, controller);
     clearTimeout(timeout);
     timeout = setTimeout(() => controller.abort("timeout"), 15000);
@@ -180,7 +180,7 @@ async function getResponse(accessToken, query) {
       }
     );
 
-    timeout = setTimeout(() => controller.abort("timeout"), 3000);
+    timeout = setTimeout(() => controller.abort("timeout"), 15000);
     await clearMessage(convoID, accessToken, controller);
     clearTimeout(timeout);
 
