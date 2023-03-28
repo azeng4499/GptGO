@@ -63,7 +63,8 @@ export async function getResponse(
     );
     clearTimeout(timeout);
 
-    await setStorage("query", [query, response]);
+    await setStorage("query", [query, response + '\n```promo\n```']);
+    setResponse(response + "\n```promo\n```")
   } catch (err) {
     console.log(err);
     clearTimeout(timeout);

@@ -288,3 +288,8 @@
   transform: translateX(275%);
   opacity: 0;
 }
+
+.promo-text {
+  font-family: "Prompt", sans-serif;
+  font-size: 0.5rem;
+}

@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { callAPI } from "../Utils/Api";
 import SettingsMenu from "../SettingsMenu/SettingsMenu.";
 import { setStorage, getStorage } from "../Utils/Shared";
+import Promotion from "../Promotion/Promotion";
 
 const Main = ({ token }) => {
   const [query, setQuery] = useState(null);
@@ -28,10 +29,6 @@ const Main = ({ token }) => {
     v4Active: false,
     v4Available: false,
   });
-
-  useEffect(() => {
-    console.log(convoInfo);
-  }, [convoInfo]);
 
   useEffect(() => {
     const setInfo = async () => {
@@ -189,6 +186,8 @@ const Main = ({ token }) => {
                           <div className="error-box">
                             <code className="code-style">{children}</code>
                           </div>
+                        ) : match != null && match[1] === "promo" ? (
+                          <Promotion />
                         ) : inline ? (
                           <code className="code-style">{children}</code>
                         ) : (
